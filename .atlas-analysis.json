@@ -1,0 +1,109 @@
+{
+  "projectType": "saas",
+  "projectName": "ReactFlix",
+  "projectDescription": "A modern movie streaming platform for browsing, renting, and purchasing films",
+  "theme": "almond",
+  "primaryColor": "#E50914",
+  "lightColor": "#F40612",
+  "darkColor": "#B20710",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/movie-catalog",
+              "features/search-filter",
+              "features/rentals",
+              "features/purchases",
+              "features/movie-details"
+            ]
+          },
+          {
+            "group": "Components",
+            "pages": [
+              "components/overview",
+              "components/movie-card",
+              "components/movie-grid",
+              "components/search-bar",
+              "components/category-filter",
+              "components/trailer-modal"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/project-structure",
+              "guides/data-management",
+              "guides/routing",
+              "guides/styling",
+              "guides/customization"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Hooks",
+            "pages": [
+              "api/hooks/use-pelicula-search"
+            ]
+          },
+          {
+            "group": "Components",
+            "pages": [
+              "api/components/pelicula-card",
+              "api/components/pelicula-grid",
+              "api/components/search-bar",
+              "api/components/category-filter",
+              "api/components/trailer-modal",
+              "api/components/alquiler-button",
+              "api/components/compra-button",
+              "api/components/loading-spinner"
+            ]
+          },
+          {
+            "group": "Data",
+            "pages": [
+              "api/data/mock-peliculas"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Movie catalog browsing with search and filtering",
+    "Movie rental and purchase system with localStorage persistence",
+    "Category-based filtering by genre",
+    "Trailer viewing with embedded YouTube player",
+    "Responsive movie cards with hover effects",
+    "Rental management with extension capabilities"
+  ],
+  "publicApiSurface": [
+    "usePeliculaSearch",
+    "PeliculaCard",
+    "PeliculaGrid",
+    "SearchBar",
+    "CategoryFilter",
+    "TrailerModal",
+    "AlquilerButton",
+    "CompraButton",
+    "LoadingSpinner",
+    "Header",
+    "Footer",
+    "mockPeliculas"
+  ]
+}
