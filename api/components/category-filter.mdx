@@ -1,0 +1,180 @@
+---
+title: 'CategoryFilter'
+description: 'Dropdown select component for filtering movies by genre/category'
+icon: 'filter'
+---
+
+## Overview
+
+`CategoryFilter` is a controlled select dropdown component that allows users to filter movies by genre. It displays a list of available categories and handles category selection.
+
+## Import
+
+```javascript
+import CategoryFilter from '../components/CategoryFilter';
+```
+
+## Props
+
+<ParamField path="categories" type="array<string>" required>
+  Array of unique category/genre names to display as options in the dropdown
+</ParamField>
+
+<ParamField path="selectedCategory" type="string" required>
+  Currently selected category value (empty string means "all categories")
+</ParamField>
+
+<ParamField path="onCategoryChange" type="function" required>
+  Callback function invoked when a category is selected
+  
+  **Signature:** `(category: string) => void`
+  
+  **Parameters:**
+  - `category` (string): The selected category value (empty string for "all")
+</ParamField>
+
+## Component Signature
+
+```javascript
+const CategoryFilter = ({ categories, selectedCategory, onCategoryChange }) => { ... }
+```
+
+## Features
+
+### Controlled Select
+
+Follows React's controlled component pattern:
+
+```javascript
+<select
+  className="category-filter__select"
+  value={selectedCategory}
+  onChange={(e) => onCategoryChange(e.target.value)}
+>
+  <option value="">Todas las categorías</option>
+  {categories.map(category => (
+    <option key={category} value={category}>
+      {category}
+    </option>
+  ))}
+</select>
+```
+
+### Default "All Categories" Option
+
+Always includes a default option with an empty value to show all movies:
+
+```javascript
+<option value="">Todas las categorías</option>
+```
+
+### Dynamic Category Options
+
+Maps over the `categories` array to generate option elements:
+
+```javascript
+{categories.map(category => (
+  <option key={category} value={category}>
+    {category}
+  </option>
+))}
+```
+
+## Usage Example
+
+<Tabs>
+  <Tab title="With usePeliculaSearch Hook">
+    ```javascript
+    import React from 'react';
+    import CategoryFilter from '../components/CategoryFilter';
+    import usePeliculaSearch from '../hooks/usePeliculaSearch';
+
+    const PeliculasPage = () => {
+      const {
+        categories,
+        selectedCategory,
+        setSelectedCategory
+      } = usePeliculaSearch();
+
+      return (
+        <div>
+          <CategoryFilter 
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
+        </div>
+      );
+    };
+    ```
+  </Tab>
+  <Tab title="With Static Categories">
+    ```javascript
+    import React, { useState } from 'react';
+    import CategoryFilter from '../components/CategoryFilter';
+
+    const StaticFilter = () => {
+      const [selected, setSelected] = useState('');
+      const genres = ['Acción', 'Drama', 'Ciencia Ficción', 'Crimen'];
+
+      return (
+        <CategoryFilter 
+          categories={genres}
+          selectedCategory={selected}
+          onCategoryChange={setSelected}
+        />
+      );
+    };
+    ```
+  </Tab>
+</Tabs>
+
+## Category Data Source
+
+When used with `usePeliculaSearch`, categories are automatically extracted from the movie data:
+
+```javascript
+// From usePeliculaSearch hook
+const categories = [...new Set(mockPeliculas.map((pelicula) => pelicula.genre))];
+```
+
+This creates a unique array of all genre values present in the dataset.
+
+## Rendered Structure
+
+```jsx
+<div className="category-filter">
+  <select className="category-filter__select" value={selectedCategory}>
+    <option value="">Todas las categorías</option>
+    <option value="Acción">Acción</option>
+    <option value="Drama">Drama</option>
+    <option value="Ciencia Ficción">Ciencia Ficción</option>
+    <!-- More options dynamically generated -->
+  </select>
+</div>
+```
+
+## CSS Classes
+
+- `.category-filter` - Container div
+- `.category-filter__select` - Select dropdown element
+
+## Behavior
+
+1. User selects a category from the dropdown
+2. `onChange` event fires
+3. `onCategoryChange` callback is invoked with the selected value
+4. Parent component updates state
+5. Filtering logic (in `usePeliculaSearch`) re-runs
+6. Filtered results are displayed
+
+## Accessibility
+
+- Uses semantic `<select>` element
+- Keyboard navigable by default
+- Each option has a unique `key` prop
+- Clear default option text
+
+## Source Location
+
+`src/components/CategoryFilter.jsx:3`

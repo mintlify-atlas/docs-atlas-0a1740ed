@@ -1,0 +1,800 @@
+---
+title: Customization
+description: Learn how to customize and extend ReactFlix to match your requirements
+---
+
+ReactFlix is designed to be customizable and extensible. This guide covers common customization scenarios, from simple styling changes to adding new features.
+
+## Quick Customization
+
+### Branding
+
+Change the application name and branding:
+
+<Steps>
+  <Step title="Update Site Name">
+    Edit the header logo in `src/components/Header.jsx:11`:
+    
+    ```javascript
+    <Link to="/" className="header__logo">
+      <h1>
+        Your<span>Brand</span>
+      </h1>
+    </Link>
+    ```
+  </Step>
+  
+  <Step title="Update Footer">
+    Edit footer branding in `src/components/Footer.jsx`:
+    
+    ```javascript
+    <div className="footer__title">YourBrand</div>
+    ```
+  </Step>
+  
+  <Step title="Update Document Title">
+    Edit `public/index.html`:
+    
+    ```html
+    <title>Your Brand Name</title>
+    ```
+  </Step>
+  
+  <Step title="Update Favicon">
+    Replace `public/favicon.ico` with your icon
+  </Step>
+</Steps>
+
+### Color Scheme
+
+Customize the color palette throughout the application:
+
+<Accordion title="Option 1: Direct CSS Updates">
+Find and replace colors in `src/styles/` files:
+
+```css
+/* Primary brand color: #e50914 → your color */
+.header__logo { color: #YOUR_COLOR; }
+.header__nav-link--active { color: #YOUR_COLOR; }
+.footer__title { color: #YOUR_COLOR; }
+.principal-page__title { color: #YOUR_COLOR; }
+
+/* Background colors */
+body { background-color: #YOUR_DARK_BG; }
+.pelicula-card { background-color: #YOUR_CARD_BG; }
+```
+</Accordion>
+
+<Accordion title="Option 2: CSS Custom Properties">
+Add CSS variables for easier theming. In `src/styles/App.css`:
+
+```css
+:root {
+  --brand-primary: #e50914;
+  --brand-hover: #f40612;
+  --bg-dark: #141414;
+  --bg-card: #1f1f1f;
+  --bg-black: #000000;
+  --text-primary: #ffffff;
+  --text-secondary: #999;
+  --text-tertiary: #666;
+  --accent-gold: #ffd700;
+  --action-rental: #2196f3;
+  --action-purchase: #4caf50;
+  --border-color: #333;
+}
+
+/* Then use throughout */
+.header__logo {
+  color: var(--brand-primary);
+}
+```
+
+This makes global color changes simple.
+</Accordion>
+
+## Data Customization
+
+### Adding New Movies
+
+Expand the movie catalog in `src/data/mockPeliculas.js:1`:
+
+```javascript
+export const mockPeliculas = [
+  // ... existing movies
+  {
+    id: 9,
+    title: "Your Movie Title",
+    director: "Director Name",
+    year: 2024,
+    genre: "Action",  // Must match existing or add new genre
+    duration: 142,
+    synopsis: "Compelling movie description that engages viewers.",
+    image: "https://your-cdn.com/poster.jpg",
+    trailerUrl: "https://www.youtube.com/embed/VIDEO_ID",
+    price: 14.99,
+    alquilerPrecio: 4.99,
+    rating: 8.2,
+    language: "English",
+    cast: ["Actor One", "Actor Two", "Actor Three"]
+  }
+];
+```
+
+<Note>
+Ensure the `id` field is unique and sequential. The `genre` field should match existing genres for proper filtering.
+</Note>
+
+### Adding New Genres
+
+New genres are automatically detected by `usePeliculaSearch` hook (`src/hooks/usePeliculaSearch.js:11`):
+
+```javascript
+const categories = [
+  ...new Set(mockPeliculas.map((pelicula) => pelicula.genre))
+];
+```
+
+Simply add movies with new genres and they'll appear in the category filter.
+
+### Modifying Movie Schema
+
+To add new fields to movies:
+
+<Steps>
+  <Step title="Update Mock Data">
+    Add the new field to all movie objects:
+    
+    ```javascript
+    {
+      // ... existing fields
+      imdbUrl: "https://www.imdb.com/title/tt1375666/",
+      ageRating: "PG-13"
+    }
+    ```
+  </Step>
+  
+  <Step title="Update Detail Page">
+    Display the new field in `src/pages/PeliculaDetailPage.jsx:74`:
+    
+    ```javascript
+    <div className="pelicula-detail__age-rating">
+      <strong>Age Rating:</strong> {pelicula.ageRating}
+    </div>
+    
+    <a 
+      href={pelicula.imdbUrl} 
+      target="_blank" 
+      rel="noopener noreferrer"
+    >
+      View on IMDb
+    </a>
+    ```
+  </Step>
+  
+  <Step title="Add Styles">
+    Style the new elements in `src/styles/pages.css`:
+    
+    ```css
+    .pelicula-detail__age-rating {
+      line-height: 1.8;
+    }
+    ```
+  </Step>
+</Steps>
+
+## Component Customization
+
+### Customizing the Header
+
+Modify navigation links in `src/components/Header.jsx:17`:
+
+<Accordion title="Adding Navigation Links">
+```javascript
+<ul className="header__nav-list">
+  {/* Existing links */}
+  <li className="header__nav-item">
+    <Link
+      to="/about"
+      className={`header__nav-link ${
+        location.pathname === "/about" ? "header__nav-link--active" : ""
+      }`}
+    >
+      About Us
+    </Link>
+  </li>
+  <li className="header__nav-item">
+    <Link
+      to="/contact"
+      className={`header__nav-link ${
+        location.pathname === "/contact" ? "header__nav-link--active" : ""
+      }`}
+    >
+      Contact
+    </Link>
+  </li>
+</ul>
+```
+
+Then add corresponding routes in `src/App.js:20`:
+
+```javascript
+<Route path="/about" element={<AboutPage />} />
+<Route path="/contact" element={<ContactPage />} />
+```
+</Accordion>
+
+<Accordion title="Adding User Menu">
+Replace the static user section (`src/components/Header.jsx:53`) with a dropdown:
+
+```javascript
+import { useState } from 'react';
+
+const [showMenu, setShowMenu] = useState(false);
+
+<div className="header__user" onClick={() => setShowMenu(!showMenu)}>
+  <span className="header__user-icon">
+    {/* SVG icon */}
+  </span>
+  <span className="header__user-name">Usuario</span>
+  
+  {showMenu && (
+    <div className="header__user-menu">
+      <Link to="/profile">My Profile</Link>
+      <Link to="/settings">Settings</Link>
+      <button onClick={handleLogout}>Logout</button>
+    </div>
+  )}
+</div>
+```
+</Accordion>
+
+### Customizing Movie Cards
+
+Modify card display in `src/components/PeliculaCard.jsx`:
+
+<Accordion title="Adding Quick Actions">
+```javascript
+<div className="pelicula-card__quick-actions">
+  <button 
+    onClick={(e) => {
+      e.preventDefault();
+      addToWatchlist(pelicula);
+    }}
+    className="pelicula-card__watchlist-btn"
+  >
+    + Watchlist
+  </button>
+</div>
+```
+</Accordion>
+
+<Accordion title="Showing More Information">
+```javascript
+<div className="pelicula-card__content">
+  <h3 className="pelicula-card__title">{pelicula.title}</h3>
+  <p className="pelicula-card__meta">
+    {pelicula.year} • {pelicula.genre}
+  </p>
+  <p className="pelicula-card__director">
+    Dir: {pelicula.director}
+  </p>
+  <div className="pelicula-card__rating">⭐ {pelicula.rating}/10</div>
+  <p className="pelicula-card__synopsis">
+    {pelicula.synopsis.substring(0, 100)}...
+  </p>
+</div>
+```
+</Accordion>
+
+### Customizing Search Behavior
+
+Modify the search hook in `src/hooks/usePeliculaSearch.js:13`:
+
+<Accordion title="Change Debounce Time">
+```javascript
+const timer = setTimeout(() => {
+  // Filter logic
+}, 500); // Change from 300ms to 500ms for slower typing
+```
+</Accordion>
+
+<Accordion title="Add Year Filter">
+```javascript
+const usePeliculaSearch = (initialPeliculas = mockPeliculas) => {
+  const [selectedYear, setSelectedYear] = useState("");
+  
+  // Extract unique years
+  const years = [...new Set(mockPeliculas.map((p) => p.year))].sort();
+  
+  useEffect(() => {
+    let results = mockPeliculas;
+    
+    // Existing filters...
+    
+    // Year filter
+    if (selectedYear) {
+      results = results.filter((p) => p.year === parseInt(selectedYear));
+    }
+    
+    setFilteredPeliculas(results);
+  }, [searchTerm, selectedCategory, selectedYear]);
+  
+  return {
+    // ... existing returns
+    selectedYear,
+    setSelectedYear,
+    years
+  };
+};
+```
+
+Then add the year filter UI in `src/pages/PeliculasPage.jsx`.
+</Accordion>
+
+<Accordion title="Add Sorting Options">
+```javascript
+const [sortBy, setSortBy] = useState('rating');
+
+useEffect(() => {
+  // ... existing filter logic
+  
+  // Sort results
+  if (sortBy === 'rating') {
+    results.sort((a, b) => b.rating - a.rating);
+  } else if (sortBy === 'year') {
+    results.sort((a, b) => b.year - a.year);
+  } else if (sortBy === 'title') {
+    results.sort((a, b) => a.title.localeCompare(b.title));
+  }
+  
+  setFilteredPeliculas(results);
+}, [searchTerm, selectedCategory, sortBy]);
+```
+</Accordion>
+
+## Feature Extensions
+
+### Adding User Authentication
+
+<Steps>
+  <Step title="Create Auth Context">
+    ```javascript
+    // src/contexts/AuthContext.js
+    import { createContext, useState, useContext } from 'react';
+    
+    const AuthContext = createContext();
+    
+    export const AuthProvider = ({ children }) => {
+      const [user, setUser] = useState(null);
+      
+      const login = (email, password) => {
+        // Authentication logic
+        setUser({ email, name: 'User Name' });
+      };
+      
+      const logout = () => {
+        setUser(null);
+        localStorage.clear();
+      };
+      
+      return (
+        <AuthContext.Provider value={{ user, login, logout }}>
+          {children}
+        </AuthContext.Provider>
+      );
+    };
+    
+    export const useAuth = () => useContext(AuthContext);
+    ```
+  </Step>
+  
+  <Step title="Wrap App with Provider">
+    ```javascript
+    // src/index.js
+    import { AuthProvider } from './contexts/AuthContext';
+    
+    root.render(
+      <React.StrictMode>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </React.StrictMode>
+    );
+    ```
+  </Step>
+  
+  <Step title="Protect Routes">
+    ```javascript
+    // src/components/ProtectedRoute.jsx
+    import { Navigate } from 'react-router-dom';
+    import { useAuth } from '../contexts/AuthContext';
+    
+    const ProtectedRoute = ({ children }) => {
+      const { user } = useAuth();
+      return user ? children : <Navigate to="/login" />;
+    };
+    
+    // src/App.js
+    <Route 
+      path="/gestion-alquileres" 
+      element={
+        <ProtectedRoute>
+          <AlquileresPage />
+        </ProtectedRoute>
+      } 
+    />
+    ```
+  </Step>
+</Steps>
+
+### Adding Watchlist Feature
+
+<Steps>
+  <Step title="Create Watchlist Hook">
+    ```javascript
+    // src/hooks/useWatchlist.js
+    import { useState, useEffect } from 'react';
+    
+    export const useWatchlist = () => {
+      const [watchlist, setWatchlist] = useState([]);
+      
+      useEffect(() => {
+        const saved = JSON.parse(
+          localStorage.getItem('watchlist') || '[]'
+        );
+        setWatchlist(saved);
+      }, []);
+      
+      const addToWatchlist = (pelicula) => {
+        const updated = [...watchlist, pelicula];
+        setWatchlist(updated);
+        localStorage.setItem('watchlist', JSON.stringify(updated));
+      };
+      
+      const removeFromWatchlist = (peliculaId) => {
+        const updated = watchlist.filter((p) => p.id !== peliculaId);
+        setWatchlist(updated);
+        localStorage.setItem('watchlist', JSON.stringify(updated));
+      };
+      
+      const isInWatchlist = (peliculaId) => {
+        return watchlist.some((p) => p.id === peliculaId);
+      };
+      
+      return { watchlist, addToWatchlist, removeFromWatchlist, isInWatchlist };
+    };
+    ```
+  </Step>
+  
+  <Step title="Create Watchlist Page">
+    ```javascript
+    // src/pages/WatchlistPage.jsx
+    import { useWatchlist } from '../hooks/useWatchlist';
+    import PeliculaGrid from '../components/PeliculaGrid';
+    
+    const WatchlistPage = () => {
+      const { watchlist } = useWatchlist();
+      
+      return (
+        <div className="watchlist-page">
+          <h1>My Watchlist</h1>
+          {watchlist.length === 0 ? (
+            <p>Your watchlist is empty</p>
+          ) : (
+            <PeliculaGrid peliculas={watchlist} loading={false} />
+          )}
+        </div>
+      );
+    };
+    ```
+  </Step>
+  
+  <Step title="Add Watchlist Button">
+    Update `PeliculaCard` or `PeliculaDetailPage` to include watchlist button
+  </Step>
+</Steps>
+
+### Adding Reviews/Ratings
+
+<Accordion title="Review Data Structure">
+```javascript
+// localStorage: 'reviews'
+{
+  peliculaId: [
+    {
+      id: 'review-uuid',
+      userId: 'user-id',
+      userName: 'John Doe',
+      rating: 4.5,
+      comment: 'Great movie!',
+      date: '2026-03-06T12:00:00.000Z'
+    }
+  ]
+}
+```
+</Accordion>
+
+<Accordion title="Review Component">
+```javascript
+// src/components/ReviewForm.jsx
+const ReviewForm = ({ pelicula, onSubmit }) => {
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit({
+      id: Date.now().toString(),
+      rating,
+      comment,
+      date: new Date().toISOString()
+    });
+    setRating(5);
+    setComment('');
+  };
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <label>
+        Rating:
+        <input 
+          type="number" 
+          min="1" 
+          max="10" 
+          value={rating} 
+          onChange={(e) => setRating(e.target.value)}
+        />
+      </label>
+      <textarea 
+        value={comment} 
+        onChange={(e) => setComment(e.target.value)}
+        placeholder="Write your review..."
+      />
+      <button type="submit">Submit Review</button>
+    </form>
+  );
+};
+```
+</Accordion>
+
+### Adding Backend Integration
+
+Replace localStorage with API calls:
+
+<Steps>
+  <Step title="Create API Service">
+    ```javascript
+    // src/services/api.js
+    const API_BASE = 'https://your-api.com/api';
+    
+    export const api = {
+      getPeliculas: async () => {
+        const response = await fetch(`${API_BASE}/movies`);
+        return response.json();
+      },
+      
+      getPelicula: async (id) => {
+        const response = await fetch(`${API_BASE}/movies/${id}`);
+        return response.json();
+      },
+      
+      rentPelicula: async (peliculaId, userId) => {
+        const response = await fetch(`${API_BASE}/rentals`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ peliculaId, userId })
+        });
+        return response.json();
+      },
+      
+      purchasePelicula: async (peliculaId, userId) => {
+        const response = await fetch(`${API_BASE}/purchases`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ peliculaId, userId })
+        });
+        return response.json();
+      }
+    };
+    ```
+  </Step>
+  
+  <Step title="Update Components">
+    Replace localStorage calls with API calls:
+    
+    ```javascript
+    // src/pages/PeliculaDetailPage.jsx
+    const handleRent = async (pelicula) => {
+      try {
+        await api.rentPelicula(pelicula.id, currentUser.id);
+        alert(`Successfully rented ${pelicula.title}`);
+        // Refresh rentals
+      } catch (error) {
+        alert('Rental failed. Please try again.');
+      }
+    };
+    ```
+  </Step>
+  
+  <Step title="Add Error Handling">
+    ```javascript
+    const [error, setError] = useState(null);
+    
+    useEffect(() => {
+      const loadPeliculas = async () => {
+        try {
+          setLoading(true);
+          const data = await api.getPeliculas();
+          setPeliculas(data);
+        } catch (err) {
+          setError('Failed to load movies');
+        } finally {
+          setLoading(false);
+        }
+      };
+      loadPeliculas();
+    }, []);
+    ```
+  </Step>
+</Steps>
+
+## Styling Customization
+
+### Adding Dark/Light Mode
+
+<Accordion title="Theme Context">
+```javascript
+// src/contexts/ThemeContext.js
+import { createContext, useState, useContext, useEffect } from 'react';
+
+const ThemeContext = createContext();
+
+export const ThemeProvider = ({ children }) => {
+  const [theme, setTheme] = useState(
+    localStorage.getItem('theme') || 'dark'
+  );
+  
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+  
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+  
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => useContext(ThemeContext);
+```
+</Accordion>
+
+<Accordion title="Theme CSS Variables">
+```css
+/* src/styles/App.css */
+:root[data-theme="dark"] {
+  --bg-primary: #141414;
+  --bg-secondary: #1f1f1f;
+  --text-primary: #ffffff;
+  --text-secondary: #999;
+}
+
+:root[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --text-primary: #000000;
+  --text-secondary: #666;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+```
+</Accordion>
+
+### Custom Animations
+
+Add loading transitions, page transitions, or hover effects:
+
+```css
+/* Page transitions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pelicula-grid {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Card entrance animation */
+.pelicula-card {
+  animation: fadeIn 0.3s ease-out;
+  animation-fill-mode: both;
+}
+
+.pelicula-card:nth-child(1) { animation-delay: 0.1s; }
+.pelicula-card:nth-child(2) { animation-delay: 0.2s; }
+.pelicula-card:nth-child(3) { animation-delay: 0.3s; }
+/* ... */
+```
+
+## Configuration Files
+
+### Environment Variables
+
+Create `.env` file for configuration:
+
+```bash
+REACT_APP_API_URL=https://your-api.com
+REACT_APP_SITE_NAME=ReactFlix
+REACT_APP_ENABLE_ANALYTICS=true
+```
+
+Access in code:
+
+```javascript
+const API_URL = process.env.REACT_APP_API_URL;
+const SITE_NAME = process.env.REACT_APP_SITE_NAME;
+```
+
+<Warning>
+Don't commit `.env` files with secrets to version control. Add `.env` to `.gitignore`.
+</Warning>
+
+### Adding TypeScript
+
+Convert to TypeScript for type safety:
+
+```bash
+npm install --save typescript @types/react @types/react-dom @types/react-router-dom
+```
+
+Rename files from `.js/.jsx` to `.ts/.tsx` and add type definitions.
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Keep It Simple" icon="hand-sparkles">
+    Start with small changes and test thoroughly
+  </Card>
+  <Card title="Maintain Consistency" icon="equals">
+    Follow existing naming conventions and patterns
+  </Card>
+  <Card title="Test Changes" icon="flask">
+    Test customizations across different screen sizes
+  </Card>
+  <Card title="Document Changes" icon="book">
+    Comment complex customizations for future reference
+  </Card>
+  <Card title="Version Control" icon="code-branch">
+    Use git to track changes and enable rollbacks
+  </Card>
+  <Card title="Performance" icon="gauge-high">
+    Monitor performance impact of new features
+  </Card>
+</CardGroup>
+
+## Related Guides
+
+<CardGroup cols={2}>
+  <Card title="Styling" icon="paintbrush" href="/guides/styling">
+    Deep dive into styling approach and patterns
+  </Card>
+  <Card title="Data Management" icon="database" href="/guides/data-management">
+    Learn how to manage and extend data
+  </Card>
+  <Card title="Project Structure" icon="folder-tree" href="/guides/project-structure">
+    Understand the codebase organization
+  </Card>
+  <Card title="Routing" icon="route" href="/guides/routing">
+    Add and configure new routes
+  </Card>
+</CardGroup>

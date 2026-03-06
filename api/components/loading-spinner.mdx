@@ -1,0 +1,178 @@
+---
+title: 'LoadingSpinner'
+description: 'Animated loading indicator component for async operations'
+icon: 'spinner'
+---
+
+## Overview
+
+`LoadingSpinner` is a simple, stateless component that displays an animated loading indicator with accompanying text. It's used throughout the application to provide visual feedback during asynchronous operations.
+
+## Import
+
+```javascript
+import LoadingSpinner from '../components/LoadingSpinner';
+```
+
+## Props
+
+This component accepts no props. It's a completely static component.
+
+## Component Signature
+
+```javascript
+const LoadingSpinner = () => { ... }
+```
+
+## Features
+
+### Animated Circle
+
+The component renders a div with the class `.loading-spinner__circle` which is typically styled with CSS animations to create a spinning effect.
+
+### Loading Text
+
+Displays "Cargando..." (Spanish for "Loading...") below the spinner.
+
+## Usage Example
+
+<Tabs>
+  <Tab title="In PeliculaGrid">
+    ```javascript
+    import React from 'react';
+    import LoadingSpinner from '../components/LoadingSpinner';
+    import PeliculaCard from '../components/PeliculaCard';
+
+    const PeliculaGrid = ({ peliculas, loading }) => {
+      if (loading) {
+        return <LoadingSpinner />;
+      }
+
+      return (
+        <div className="pelicula-grid">
+          {peliculas.map(pelicula => (
+            <PeliculaCard key={pelicula.id} pelicula={pelicula} />
+          ))}
+        </div>
+      );
+    };
+    ```
+  </Tab>
+  <Tab title="In Detail Page">
+    ```javascript
+    import React, { useState, useEffect } from 'react';
+    import LoadingSpinner from '../components/LoadingSpinner';
+
+    const PeliculaDetailPage = () => {
+      const [loading, setLoading] = useState(true);
+      const [pelicula, setPelicula] = useState(null);
+
+      useEffect(() => {
+        // Simulate data fetching
+        setTimeout(() => {
+          setPelicula({ title: "Inception" });
+          setLoading(false);
+        }, 500);
+      }, []);
+
+      if (loading) {
+        return <LoadingSpinner />;
+      }
+
+      return <div>{pelicula.title}</div>;
+    };
+    ```
+  </Tab>
+  <Tab title="Standalone">
+    ```javascript
+    import React from 'react';
+    import LoadingSpinner from '../components/LoadingSpinner';
+
+    const App = () => {
+      return (
+        <div className="app">
+          <LoadingSpinner />
+        </div>
+      );
+    };
+    ```
+  </Tab>
+</Tabs>
+
+## Rendered Structure
+
+```jsx
+<div className="loading-spinner">
+  <div className="loading-spinner__circle"></div>
+  <p className="loading-spinner__text">Cargando...</p>
+</div>
+```
+
+## CSS Classes
+
+- `.loading-spinner` - Main container
+- `.loading-spinner__circle` - Animated spinner element (typically styled with CSS animations)
+- `.loading-spinner__text` - "Cargando..." text element
+
+## Typical CSS Animation
+
+While CSS is not provided in the component, the spinner is typically animated like this:
+
+```css
+.loading-spinner__circle {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+```
+
+## Usage Patterns
+
+Commonly used in these scenarios:
+
+1. **Grid Loading** - While fetching/filtering movie lists
+2. **Detail Loading** - While loading individual movie details
+3. **Search Results** - During debounced search operations
+4. **Async Operations** - Any time data is being fetched
+
+## Conditional Rendering Pattern
+
+```javascript
+if (loading) {
+  return <LoadingSpinner />;
+}
+
+// Render actual content
+return <ActualContent />;
+```
+
+## Accessibility
+
+- Consider adding `role="status"` to the container
+- Consider adding `aria-live="polite"` for screen readers
+- The text "Cargando..." provides context for screen readers
+
+## Enhancement Suggestions
+
+```javascript
+// Potential enhancement with accessibility
+const LoadingSpinner = () => {
+  return (
+    <div className="loading-spinner" role="status" aria-live="polite">
+      <div className="loading-spinner__circle" aria-hidden="true"></div>
+      <p className="loading-spinner__text">Cargando...</p>
+    </div>
+  );
+};
+```
+
+## Source Location
+
+`src/components/LoadingSpinner.jsx:3`

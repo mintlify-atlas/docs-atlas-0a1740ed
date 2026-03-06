@@ -1,0 +1,542 @@
+---
+title: Routing
+description: Learn how ReactFlix implements navigation using React Router DOM
+---
+
+ReactFlix uses React Router DOM v7 for client-side routing, enabling seamless navigation without page reloads. This guide covers the routing architecture, configuration, and navigation patterns.
+
+## Router Configuration
+
+The routing system is configured in `src/App.js:1` using React Router DOM's declarative API.
+
+### Route Setup
+
+```javascript
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import PrincipalPage from './pages/PrincipalPage';
+import PeliculasPage from './pages/PeliculasPage';
+import PeliculaDetailPage from './pages/PeliculaDetailPage';
+import AlquileresPage from './pages/AlquileresPage';
+import ComprasPage from './pages/ComprasPage';
+
+function App() {
+  return (
+    <Router>
+      <div className="app">
+        <Header />
+        <main className="app__main">
+          <Routes>
+            <Route path="/" element={<PrincipalPage />} />
+            <Route path="/peliculas" element={<PeliculasPage />} />
+            <Route path="/pelicula/:id" element={<PeliculaDetailPage />} />
+            <Route path="/gestion-alquileres" element={<AlquileresPage />} />
+            <Route path="/gestion-compras" element={<ComprasPage />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
+  );
+}
+```
+
+<Note>
+The `Header` and `Footer` components are rendered outside the `Routes` component, making them persistent across all pages.
+</Note>
+
+## Route Structure
+
+ReactFlix implements 5 main routes:
+
+<Accordion title="/ - Home Route">
+**Path**: `/`
+
+**Component**: `PrincipalPage`
+
+**Purpose**: Landing page with hero section and featured movies
+
+**Navigation**: Accessible via site logo and "Inicio" link
+
+```javascript
+<Route path="/" element={<PrincipalPage />} />
+```
+</Accordion>
+
+<Accordion title="/peliculas - Catalog Route">
+**Path**: `/peliculas`
+
+**Component**: `PeliculasPage`
+
+**Purpose**: Full movie catalog with search and filtering
+
+**Features**:
+- Search by title, director, or cast
+- Filter by genre
+- Grid display of all movies
+
+```javascript
+<Route path="/peliculas" element={<PeliculasPage />} />
+```
+</Accordion>
+
+<Accordion title="/pelicula/:id - Detail Route">
+**Path**: `/pelicula/:id`
+
+**Component**: `PeliculaDetailPage`
+
+**Purpose**: Detailed view of a single movie
+
+**URL Parameters**:
+- `:id` - Movie ID (numeric)
+
+**Example URLs**:
+- `/pelicula/1` - Inception
+- `/pelicula/4` - The Dark Knight
+
+**Features**:
+- Full movie information
+- Trailer viewing
+- Rent/purchase actions
+
+```javascript
+<Route path="/pelicula/:id" element={<PeliculaDetailPage />} />
+```
+</Accordion>
+
+<Accordion title="/gestion-alquileres - Rentals Route">
+**Path**: `/gestion-alquileres`
+
+**Component**: `AlquileresPage`
+
+**Purpose**: Manage user's rented movies
+
+**Features**:
+- View all rented movies
+- Extend rental periods
+- Displays rental date
+
+```javascript
+<Route path="/gestion-alquileres" element={<AlquileresPage />} />
+```
+</Accordion>
+
+<Accordion title="/gestion-compras - Purchases Route">
+**Path**: `/gestion-compras`
+
+**Component**: `ComprasPage`
+
+**Purpose**: Library of purchased movies
+
+**Features**:
+- View all purchased movies
+- Access anytime (no expiration)
+- Purchase history
+
+```javascript
+<Route path="/gestion-compras" element={<ComprasPage />} />
+```
+</Accordion>
+
+## Navigation Implementation
+
+### Header Navigation
+
+The `Header` component (`src/components/Header.jsx:1`) implements navigation with active state highlighting:
+
+```javascript
+import { Link, useLocation } from "react-router-dom";
+
+const Header = () => {
+  const location = useLocation();
+
+  return (
+    <header className="header">
+      <div className="header__container">
+        <Link to="/" className="header__logo">
+          <h1>React<span>Flix</span></h1>
+        </Link>
+
+        <nav className="header__nav">
+          <ul className="header__nav-list">
+            <li className="header__nav-item">
+              <Link
+                to="/"
+                className={`header__nav-link ${
+                  location.pathname === "/" ? "header__nav-link--active" : ""
+                }`}
+              >
+                Inicio
+              </Link>
+            </li>
+            <li className="header__nav-item">
+              <Link
+                to="/peliculas"
+                className={`header__nav-link ${
+                  location.pathname === "/peliculas" ? "header__nav-link--active" : ""
+                }`}
+              >
+                Películas
+              </Link>
+            </li>
+            {/* More nav items... */}
+          </ul>
+        </nav>
+      </div>
+    </header>
+  );
+};
+```
+
+<Steps>
+  <Step title="Import Navigation Hooks">
+    Import `Link` for navigation and `useLocation` for active state:
+    ```javascript
+    import { Link, useLocation } from "react-router-dom";
+    ```
+  </Step>
+  
+  <Step title="Get Current Location">
+    Use the `useLocation` hook to access current path:
+    ```javascript
+    const location = useLocation();
+    ```
+  </Step>
+  
+  <Step title="Conditional Class Names">
+    Apply active class based on current path:
+    ```javascript
+    className={`header__nav-link ${
+      location.pathname === "/peliculas" ? "header__nav-link--active" : ""
+    }`}
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+The `Link` component prevents full page reloads and provides a better user experience than traditional `<a>` tags.
+</Tip>
+
+### Programmatic Navigation
+
+ReactFlix uses the `useNavigate` hook for programmatic navigation in response to user actions.
+
+**Example**: Detail page navigation (`src/pages/PeliculaDetailPage.jsx:11`)
+
+```javascript
+import { useNavigate } from 'react-router-dom';
+
+const PeliculaDetailPage = () => {
+  const navigate = useNavigate();
+
+  if (!pelicula) {
+    return (
+      <div className="pelicula-detail__not-found">
+        <h2>Película no encontrada</h2>
+        <button 
+          onClick={() => navigate('/peliculas')} 
+          className="pelicula-detail__back-btn"
+        >
+          Volver al catálogo
+        </button>
+      </div>
+    );
+  }
+};
+```
+
+**Navigation from Cards** (`src/components/PeliculaCard.jsx`):
+
+```javascript
+import { Link } from 'react-router-dom';
+
+<Link 
+  to={`/pelicula/${pelicula.id}`} 
+  className="pelicula-card__details-btn"
+>
+  Ver Detalles
+</Link>
+```
+
+## URL Parameters
+
+### Accessing Route Parameters
+
+The detail page uses `useParams` to extract the movie ID from the URL:
+
+```javascript
+import { useParams } from 'react-router-dom';
+import { mockPeliculas } from '../data/mockPeliculas';
+
+const PeliculaDetailPage = () => {
+  const { id } = useParams();
+  const [pelicula, setPelicula] = useState(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const foundPelicula = mockPeliculas.find(
+        m => m.id === parseInt(id)
+      );
+      setPelicula(foundPelicula);
+      setLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [id]);
+};
+```
+
+<Steps>
+  <Step title="Extract Parameter">
+    ```javascript
+    const { id } = useParams();
+    ```
+    This extracts the `:id` parameter from `/pelicula/:id`
+  </Step>
+  
+  <Step title="Convert Type">
+    ```javascript
+    parseInt(id)
+    ```
+    URL parameters are strings, so convert to number for comparison
+  </Step>
+  
+  <Step title="Find Movie">
+    ```javascript
+    mockPeliculas.find(m => m.id === parseInt(id))
+    ```
+    Search the dataset for matching movie
+  </Step>
+  
+  <Step title="Handle Not Found">
+    ```javascript
+    if (!pelicula) {
+      return <NotFoundComponent />;
+    }
+    ```
+    Display error state if movie doesn't exist
+  </Step>
+</Steps>
+
+### Parameter Re-fetching
+
+The `useEffect` dependency array includes `id`, causing data re-fetch when the parameter changes:
+
+```javascript
+useEffect(() => {
+  // Fetch logic
+}, [id]); // Re-run when id changes
+```
+
+<Note>
+This allows users to navigate between detail pages without returning to the catalog - the component updates with new data.
+</Note>
+
+## Router Features
+
+### BrowserRouter
+
+ReactFlix uses `BrowserRouter` which leverages the HTML5 History API:
+
+<CardGroup cols={2}>
+  <Card title="Clean URLs" icon="link">
+    URLs look like `/peliculas` instead of `/#/peliculas`
+  </Card>
+  <Card title="Server Config" icon="server">
+    Requires server configuration to serve index.html for all routes
+  </Card>
+  <Card title="History API" icon="clock-rotate-left">
+    Supports browser back/forward buttons
+  </Card>
+  <Card title="SEO Friendly" icon="magnifying-glass">
+    Better for search engine crawling
+  </Card>
+</CardGroup>
+
+### Routes vs Switch
+
+<Note>
+React Router v6+ uses `<Routes>` instead of the older `<Switch>` component. `<Routes>` provides better performance and improved route matching.
+</Note>
+
+## Navigation Patterns
+
+### Link-Based Navigation
+
+**Use Case**: Static navigation, links in content
+
+```javascript
+import { Link } from 'react-router-dom';
+
+<Link to="/peliculas">Browse Movies</Link>
+```
+
+### Button-Based Navigation
+
+**Use Case**: Actions after user interactions, callbacks
+
+```javascript
+import { useNavigate } from 'react-router-dom';
+
+const MyComponent = () => {
+  const navigate = useNavigate();
+  
+  const handleAction = () => {
+    // Perform some logic
+    navigate('/success');
+  };
+  
+  return <button onClick={handleAction}>Submit</button>;
+};
+```
+
+### Conditional Navigation
+
+**Use Case**: Navigate based on conditions
+
+```javascript
+const handleRent = (pelicula) => {
+  // Save to localStorage
+  localStorage.setItem('alquileres', JSON.stringify([...alquileres, pelicula]));
+  
+  // Navigate to rentals page
+  navigate('/gestion-alquileres');
+};
+```
+
+## Active Link Styling
+
+ReactFlix implements custom active link styling:
+
+**CSS** (`src/styles/components.css:48`):
+
+```css
+.header__nav-link--active {
+  color: #e50914;
+  font-weight: bold;
+}
+```
+
+**JavaScript Logic**:
+
+```javascript
+const isActive = location.pathname === "/peliculas";
+const className = `header__nav-link ${isActive ? "header__nav-link--active" : ""}`;
+```
+
+<Accordion title="Alternative: NavLink Component">
+React Router provides a `NavLink` component with built-in active state:
+
+```javascript
+import { NavLink } from 'react-router-dom';
+
+<NavLink 
+  to="/peliculas"
+  className={({ isActive }) => 
+    `header__nav-link ${isActive ? "header__nav-link--active" : ""}`
+  }
+>
+  Películas
+</NavLink>
+```
+
+This approach is cleaner but ReactFlix uses manual implementation with `useLocation`.
+</Accordion>
+
+## Route Protection
+
+<Warning>
+ReactFlix currently has no authentication or route protection. All routes are publicly accessible.
+</Warning>
+
+To add protected routes:
+
+```javascript
+const ProtectedRoute = ({ children }) => {
+  const isAuthenticated = // check auth state
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
+
+// Usage
+<Route 
+  path="/gestion-alquileres" 
+  element={
+    <ProtectedRoute>
+      <AlquileresPage />
+    </ProtectedRoute>
+  } 
+/>
+```
+
+## 404 Handling
+
+ReactFlix doesn't currently implement a catch-all 404 route. To add one:
+
+```javascript
+import NotFoundPage from './pages/NotFoundPage';
+
+<Routes>
+  <Route path="/" element={<PrincipalPage />} />
+  {/* Other routes */}
+  <Route path="*" element={<NotFoundPage />} />
+</Routes>
+```
+
+The `*` path matches any route not previously defined.
+
+## Best Practices
+
+<Steps>
+  <Step title="Use Link for Navigation">
+    Always use `<Link>` instead of `<a>` tags to prevent full page reloads:
+    ```javascript
+    ✅ <Link to="/peliculas">Movies</Link>
+    ❌ <a href="/peliculas">Movies</a>
+    ```
+  </Step>
+  
+  <Step title="Extract Route Parameters">
+    Always validate and type-convert URL parameters:
+    ```javascript
+    const { id } = useParams();
+    const numericId = parseInt(id);
+    if (isNaN(numericId)) {
+      // Handle invalid ID
+    }
+    ```
+  </Step>
+  
+  <Step title="Handle Loading States">
+    Show loading indicators during route transitions with data fetching:
+    ```javascript
+    if (loading) return <LoadingSpinner />;
+    ```
+  </Step>
+  
+  <Step title="Clean Up Effects">
+    Return cleanup functions in useEffect hooks:
+    ```javascript
+    useEffect(() => {
+      const timer = setTimeout(...);
+      return () => clearTimeout(timer);
+    }, [id]);
+    ```
+  </Step>
+</Steps>
+
+## Related Guides
+
+<CardGroup cols={2}>
+  <Card title="Project Structure" icon="folder-tree" href="/guides/project-structure">
+    Understand how routes map to page components
+  </Card>
+  <Card title="Data Management" icon="database" href="/guides/data-management">
+    Learn how pages fetch and manage data
+  </Card>
+</CardGroup>

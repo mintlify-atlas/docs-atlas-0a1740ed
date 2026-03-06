@@ -1,0 +1,252 @@
+---
+title: 'Movie Catalog'
+description: 'Browse and explore the complete movie collection in ReactFlix'
+icon: 'film'
+---
+
+## Overview
+
+The movie catalog is the heart of ReactFlix, providing users with a comprehensive, visually appealing grid of available movies. The catalog displays movie posters, key information, and quick access to trailers and detailed information.
+
+## How It Works
+
+The catalog page is built using a modular component architecture that separates concerns between data management, filtering, and presentation.
+
+### Core Components
+
+<CardGroup cols={2}>
+  <Card title="PeliculasPage" icon="page">
+    Main container that orchestrates the catalog view, search, and filters
+  </Card>
+  <Card title="PeliculaGrid" icon="grid">
+    Responsive grid layout that displays movie cards
+  </Card>
+  <Card title="PeliculaCard" icon="rectangle-wide">
+    Individual movie card with poster, metadata, and actions
+  </Card>
+  <Card title="usePeliculaSearch" icon="magnifying-glass">
+    Custom hook managing search and filter logic
+  </Card>
+</CardGroup>
+
+## Movie Data Structure
+
+Each movie in the catalog contains comprehensive metadata:
+
+```javascript
+{
+  id: 1,
+  title: "Inception",
+  director: "Christopher Nolan",
+  year: 2010,
+  genre: "Ciencia Ficción",
+  duration: 148,
+  synopsis: "Un ladrón que roba secretos corporativos...",
+  image: "https://...",
+  trailerUrl: "https://www.youtube.com/embed/YoHD9XEInc0",
+  price: 12.99,
+  alquilerPrecio: 3.99,
+  rating: 8.8,
+  language: "Inglés",
+  cast: ["Leonardo DiCaprio", "Joseph Gordon-Levitt", "Elliot Page"]
+}
+```
+
+<Note>
+  The movie data is currently sourced from `mockPeliculas.js`, providing 8 sample movies. This can be easily replaced with an API endpoint in production.
+</Note>
+
+## Page Layout
+
+The catalog page follows a clean, user-friendly layout:
+
+```jsx
+<div className="peliculas-page">
+  <h1 className="peliculas-page__title">Catálogo de Películas</h1>
+  
+  <div className="peliculas-page__filters">
+    <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+    <CategoryFilter 
+      categories={categories}
+      selectedCategory={selectedCategory}
+      onCategoryChange={setSelectedCategory}
+    />
+  </div>
+
+  <p className="peliculas-page__results">
+    {filteredPeliculas.length} películas encontradas
+  </p>
+
+  <PeliculaGrid peliculas={filteredPeliculas} loading={loading} />
+</div>
+```
+
+## Movie Cards
+
+Each movie card is interactive and information-rich:
+
+### Visual Elements
+
+- **Movie Poster**: High-quality image with fallback for broken links
+- **Overlay Controls**: Appears on hover with trailer button
+- **Rating Badge**: Displays IMDb-style rating (out of 10)
+- **Duration & Year**: Quick metadata display
+
+### Interactive Features
+
+<CardGroup cols={2}>
+  <Card title="Watch Trailer" icon="play">
+    Click the overlay button to watch the movie trailer in a modal
+  </Card>
+  <Card title="View Details" icon="circle-info">
+    Navigate to the full detail page for complete information
+  </Card>
+</CardGroup>
+
+### Card Implementation
+
+The `PeliculaCard` component handles image errors gracefully and provides intuitive controls:
+
+```jsx
+const PeliculaCard = ({ pelicula }) => {
+  const [showTrailer, setShowTrailer] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <article className="pelicula-card">
+      <div className="pelicula-card__image-container">
+        <img 
+          src={imageError ? 'fallback-image.jpg' : pelicula.image}
+          alt={pelicula.title}
+          onError={handleImageError}
+        />
+        <div className="pelicula-card__overlay">
+          <button onClick={() => setShowTrailer(true)}>
+            ▶ Ver Tráiler
+          </button>
+        </div>
+      </div>
+      
+      <div className="pelicula-card__content">
+        <h3>{pelicula.title}</h3>
+        <p>{pelicula.year} • {pelicula.duration} min</p>
+        <p>⭐ {pelicula.rating}/10</p>
+        <Link to={`/pelicula/${pelicula.id}`}>Ver detalles</Link>
+      </div>
+    </article>
+  );
+};
+```
+
+## Loading States
+
+The catalog provides visual feedback during data loading:
+
+```jsx
+const PeliculaGrid = ({ peliculas, loading }) => {
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (!peliculas || peliculas.length === 0) {
+    return (
+      <div className="pelicula-grid__empty">
+        <p>No se encontraron películas</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pelicula-grid">
+      {peliculas.map(pelicula => (
+        <PeliculaCard key={pelicula.id} pelicula={pelicula} />
+      ))}
+    </div>
+  );
+};
+```
+
+<Info>
+  The loading state includes a 300ms debounce to prevent flickering during fast searches.
+</Info>
+
+## Trailer Modal
+
+When users click to watch a trailer, a full-screen modal appears with an embedded YouTube player:
+
+### Features
+
+- **Keyboard Support**: Press ESC to close the modal
+- **Click Outside**: Click the backdrop to dismiss
+- **Body Scroll Lock**: Prevents scrolling while modal is open
+- **Responsive Video**: Embedded iframe scales to screen size
+
+```jsx
+const TrailerModal = ({ pelicula, onClose }) => {
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEsc);
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'auto';
+    };
+  }, [onClose]);
+
+  return (
+    <div className="modal" onClick={onClose}>
+      <div className="modal__content" onClick={(e) => e.stopPropagation()}>
+        <button className="modal__close" onClick={onClose}>×</button>
+        <h2>{pelicula.title} - Tráiler</h2>
+        <iframe
+          src={pelicula.trailerUrl}
+          allow="accelerometer; autoplay; encrypted-media; gyroscope"
+          allowFullScreen
+        ></iframe>
+      </div>
+    </div>
+  );
+};
+```
+
+## User Experience
+
+### Browsing Flow
+
+1. **Landing**: Users arrive at the catalog and see all available movies
+2. **Exploration**: Hover over cards to reveal trailer buttons
+3. **Quick Preview**: Click "Ver Tráiler" to watch without leaving the page
+4. **Deep Dive**: Click "Ver detalles" to view full movie information
+
+<Tip>
+  The catalog shows a results counter (e.g., "8 películas encontradas") to help users understand the current view state.
+</Tip>
+
+## Responsive Design
+
+The movie grid automatically adjusts based on screen size:
+
+- **Desktop**: 4 columns of movie cards
+- **Tablet**: 2-3 columns with adjusted card sizes
+- **Mobile**: Single column, full-width cards
+
+## Performance Considerations
+
+- **Image Loading**: Cards handle broken images with graceful fallbacks
+- **Debounced Search**: 300ms delay prevents excessive filtering
+- **Memoization**: `usePeliculaSearch` efficiently manages state updates
+- **Key Props**: Proper key usage ensures efficient React rendering
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Search & Filter" icon="filter" href="/features/search-filter">
+    Learn how users can narrow down the catalog
+  </Card>
+  <Card title="Movie Details" icon="circle-info" href="/features/movie-details">
+    Explore the detailed movie information page
+  </Card>
+</CardGroup>

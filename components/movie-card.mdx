@@ -1,0 +1,257 @@
+---
+title: PeliculaCard
+description: Display individual movie information in a card format
+icon: id-card
+---
+
+# PeliculaCard
+
+The `PeliculaCard` component displays a single movie with its poster, title, metadata, rating, and action buttons. It includes hover effects and integrates with the trailer modal.
+
+## Component Overview
+
+```jsx
+import PeliculaCard from './components/PeliculaCard';
+
+function App() {
+  return (
+    <PeliculaCard 
+      pelicula={{
+        id: 1,
+        title: "Inception",
+        year: 2010,
+        duration: 148,
+        rating: 8.8,
+        image: "https://example.com/inception.jpg",
+        trailerUrl: "https://youtube.com/embed/..."
+      }} 
+    />
+  );
+}
+```
+
+## Props
+
+<ParamField path="pelicula" type="object" required>
+  Movie object containing all necessary information
+  
+  <ParamField path="pelicula.id" type="number" required>
+    Unique identifier for the movie
+  </ParamField>
+  
+  <ParamField path="pelicula.title" type="string" required>
+    Movie title
+  </ParamField>
+  
+  <ParamField path="pelicula.year" type="number" required>
+    Release year
+  </ParamField>
+  
+  <ParamField path="pelicula.duration" type="number" required>
+    Movie duration in minutes
+  </ParamField>
+  
+  <ParamField path="pelicula.rating" type="number" required>
+    Movie rating out of 10
+  </ParamField>
+  
+  <ParamField path="pelicula.image" type="string" required>
+    URL to movie poster image
+  </ParamField>
+  
+  <ParamField path="pelicula.trailerUrl" type="string" required>
+    YouTube embed URL for the movie trailer
+  </ParamField>
+</ParamField>
+
+## Features
+
+### Image Error Handling
+
+The component includes automatic fallback for broken images:
+
+```jsx
+const [imageError, setImageError] = useState(false);
+
+const handleImageError = () => {
+  setImageError(true);
+};
+
+<img 
+  src={imageError ? 'https://img.freepik.com/vector-premium/emoji-cara-nula-ilustracion_1272837-162.jpg' : pelicula.image} 
+  alt={pelicula.title}
+  onError={handleImageError}
+/>
+```
+
+If the movie poster fails to load, a placeholder image is displayed automatically.
+
+### Hover Overlay
+
+When hovering over the card, an overlay appears with a "Ver Tráiler" (Watch Trailer) button:
+
+```jsx
+<div className="pelicula-card__overlay">
+  <button 
+    className="pelicula-card__trailer-btn"
+    onClick={() => setShowTrailer(true)}
+  >
+    ▶ Ver Tráiler
+  </button>
+</div>
+```
+
+### Integrated Trailer Modal
+
+The component manages its own trailer modal state:
+
+```jsx
+const [showTrailer, setShowTrailer] = useState(false);
+
+{showTrailer && (
+  <TrailerModal 
+    pelicula={pelicula} 
+    onClose={() => setShowTrailer(false)} 
+  />
+)}
+```
+
+## Component Structure
+
+```jsx
+const PeliculaCard = ({ pelicula }) => {
+  const [showTrailer, setShowTrailer] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <>
+      <article className="pelicula-card">
+        <div className="pelicula-card__image-container">
+          <img />
+          <div className="pelicula-card__overlay">
+            <button>Ver Tráiler</button>
+          </div>
+        </div>
+        
+        <div className="pelicula-card__content">
+          <h3>{pelicula.title}</h3>
+          <p>{pelicula.year} • {pelicula.duration} min</p>
+          <p>⭐ {pelicula.rating}/10</p>
+          <Link to={`/pelicula/${pelicula.id}`}>Ver detalles</Link>
+        </div>
+      </article>
+
+      {showTrailer && <TrailerModal />}
+    </>
+  );
+};
+```
+
+## Usage in Grid
+
+Typically used within a `PeliculaGrid` component:
+
+```jsx
+import PeliculaGrid from './components/PeliculaGrid';
+
+function PeliculasPage() {
+  const peliculas = [
+    { id: 1, title: "Inception", /* ... */ },
+    { id: 2, title: "The Matrix", /* ... */ },
+  ];
+
+  return <PeliculaGrid peliculas={peliculas} loading={false} />;
+}
+```
+
+The grid automatically maps over movies and renders individual cards.
+
+## Full Component Code
+
+Location: `src/components/PeliculaCard.jsx:1`
+
+```jsx
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import TrailerModal from './TrailerModal';
+
+const PeliculaCard = ({ pelicula }) => {
+  const [showTrailer, setShowTrailer] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
+  return (
+    <>
+      <article className="pelicula-card">
+        <div className="pelicula-card__image-container">
+          <img 
+            src={imageError ? 'https://img.freepik.com/vector-premium/emoji-cara-nula-ilustracion_1272837-162.jpg' : pelicula.image} 
+            alt={pelicula.title}
+            className="pelicula-card__image"
+            onError={handleImageError}
+          />
+          <div className="pelicula-card__overlay">
+            <button 
+              className="pelicula-card__trailer-btn"
+              onClick={() => setShowTrailer(true)}
+            >
+              ▶ Ver Tráiler
+            </button>
+          </div>
+        </div>
+        
+        <div className="pelicula-card__content">
+          <h3 className="pelicula-card__title">{pelicula.title}</h3>
+          <p className="pelicula-card__meta">{pelicula.year} • {pelicula.duration} min</p>
+          <p className="pelicula-card__rating">⭐ {pelicula.rating}/10</p>
+          
+          <div className="pelicula-card__actions">
+            <Link to={`/pelicula/${pelicula.id}`} className="pelicula-card__details-btn">
+              Ver detalles
+            </Link>
+          </div>
+        </div>
+      </article>
+
+      {showTrailer && (
+        <TrailerModal 
+          pelicula={pelicula} 
+          onClose={() => setShowTrailer(false)} 
+        />
+      )}
+    </>
+  );
+};
+
+export default PeliculaCard;
+```
+
+## Styling
+
+The component uses BEM naming with these main classes:
+
+- `.pelicula-card` - Main container
+- `.pelicula-card__image-container` - Poster wrapper
+- `.pelicula-card__image` - Poster image
+- `.pelicula-card__overlay` - Hover overlay
+- `.pelicula-card__trailer-btn` - Trailer button
+- `.pelicula-card__content` - Text content area
+- `.pelicula-card__title` - Movie title
+- `.pelicula-card__meta` - Year and duration
+- `.pelicula-card__rating` - Rating display
+- `.pelicula-card__details-btn` - Details link button
+
+## Related Components
+
+<CardGroup cols={2}>
+  <Card title="PeliculaGrid" icon="table-cells" href="/components/movie-grid">
+    Container component for displaying multiple movie cards
+  </Card>
+  
+  <Card title="TrailerModal" icon="circle-play" href="/components/trailer-modal">
+    Modal used for displaying movie trailers
+  </Card>
+</CardGroup>

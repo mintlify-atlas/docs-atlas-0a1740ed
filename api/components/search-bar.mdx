@@ -1,0 +1,147 @@
+---
+title: 'SearchBar'
+description: 'Text input component for searching movies by title, director, or cast'
+icon: 'magnifying-glass'
+---
+
+## Overview
+
+`SearchBar` is a controlled input component that allows users to search for movies. It provides a text input field with a search icon and placeholder text.
+
+## Import
+
+```javascript
+import SearchBar from '../components/SearchBar';
+```
+
+## Props
+
+<ParamField path="searchTerm" type="string" required>
+  Current value of the search input (controlled component pattern)
+</ParamField>
+
+<ParamField path="onSearchChange" type="function" required>
+  Callback function invoked when the input value changes
+  
+  **Signature:** `(value: string) => void`
+  
+  **Parameters:**
+  - `value` (string): The new search term entered by the user
+</ParamField>
+
+## Component Signature
+
+```javascript
+const SearchBar = ({ searchTerm, onSearchChange }) => { ... }
+```
+
+## Features
+
+### Controlled Input
+
+The component follows React's controlled component pattern:
+
+```javascript
+<input
+  type="text"
+  className="search-bar__input"
+  placeholder="Buscar películas por título, director o actor..."
+  value={searchTerm}
+  onChange={(e) => onSearchChange(e.target.value)}
+/>
+```
+
+### Search Icon
+
+Includes a visual search icon (magnifying glass emoji) for better UX:
+
+```javascript
+<span className="search-bar__icon">🔍</span>
+```
+
+## Usage Example
+
+<Tabs>
+  <Tab title="With usePeliculaSearch Hook">
+    ```javascript
+    import React from 'react';
+    import SearchBar from '../components/SearchBar';
+    import usePeliculaSearch from '../hooks/usePeliculaSearch';
+
+    const PeliculasPage = () => {
+      const { searchTerm, setSearchTerm } = usePeliculaSearch();
+
+      return (
+        <div>
+          <SearchBar 
+            searchTerm={searchTerm} 
+            onSearchChange={setSearchTerm} 
+          />
+        </div>
+      );
+    };
+    ```
+  </Tab>
+  <Tab title="With Local State">
+    ```javascript
+    import React, { useState } from 'react';
+    import SearchBar from '../components/SearchBar';
+
+    const CustomSearch = () => {
+      const [query, setQuery] = useState('');
+
+      const handleSearch = (value) => {
+        setQuery(value);
+        console.log('Searching for:', value);
+      };
+
+      return (
+        <SearchBar 
+          searchTerm={query} 
+          onSearchChange={handleSearch} 
+        />
+      );
+    };
+    ```
+  </Tab>
+</Tabs>
+
+## Rendered Structure
+
+```jsx
+<div className="search-bar">
+  <input
+    type="text"
+    className="search-bar__input"
+    placeholder="Buscar películas por título, director o actor..."
+    value={searchTerm}
+    onChange={(e) => onSearchChange(e.target.value)}
+  />
+  <span className="search-bar__icon">🔍</span>
+</div>
+```
+
+## CSS Classes
+
+- `.search-bar` - Container div
+- `.search-bar__input` - Text input element
+- `.search-bar__icon` - Search icon span
+
+## Accessibility
+
+- Uses semantic `<input type="text">` element
+- Includes descriptive placeholder text
+- Keyboard accessible by default
+
+## Integration Notes
+
+When used with `usePeliculaSearch`, the search term filters movies by:
+- Movie title (case-insensitive)
+- Director name (case-insensitive)
+- Cast member names (case-insensitive)
+
+Filtering is debounced with a 300ms delay in the hook.
+
+## Source Location
+
+`src/components/SearchBar.jsx:3`

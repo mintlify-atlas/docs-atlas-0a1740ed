@@ -1,0 +1,488 @@
+---
+title: 'Movie Detail Page'
+description: 'Comprehensive movie information with trailers, cast, and transaction options'
+icon: 'circle-info'
+---
+
+## Overview
+
+The movie detail page is the central hub for all information about a specific film. It displays comprehensive metadata, allows users to watch trailers, and provides options to rent or purchase the movie.
+
+## Page Structure
+
+The detail page combines visual and textual information in an intuitive layout:
+
+<CardGroup cols={2}>
+  <Card title="Left Panel" icon="image">
+    Large movie poster with high-quality imagery
+  </Card>
+  <Card title="Right Panel" icon="list">
+    Complete metadata, synopsis, cast, and action buttons
+  </Card>
+</CardGroup>
+
+## Implementation
+
+The `PeliculaDetailPage` component handles routing, data loading, and user interactions:
+
+```jsx
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import RentalButton from '../components/AlquilerButton';
+import PurchaseButton from '../components/CompraButton';
+import TrailerModal from '../components/TrailerModal';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { mockPeliculas } from '../data/mockPeliculas';
+
+const PeliculaDetailPage = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [pelicula, setPelicula] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showTrailer, setShowTrailer] = useState(false);
+  const [alquileres, setAlquileres] = useState([]);
+  const [compras, setCompras] = useState([]);
+
+  // Load movie data and localStorage state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const foundPelicula = mockPeliculas.find(m => m.id === parseInt(id));
+      if (foundPelicula) {
+        setPelicula(foundPelicula);
+      }
+      setLoading(false);
+    }, 500);
+
+    const savedAlquileres = JSON.parse(localStorage.getItem('alquileres') || '[]');
+    const savedCompras = JSON.parse(localStorage.getItem('compras') || '[]');
+    setAlquileres(savedAlquileres);
+    setCompras(savedCompras);
+
+    return () => clearTimeout(timer);
+  }, [id]);
+
+  // ... handler functions
+};
+```
+
+## URL Routing
+
+The page uses React Router to capture the movie ID from the URL:
+
+```
+/pelicula/:id → /pelicula/1 (Inception)
+/pelicula/:id → /pelicula/4 (The Dark Knight)
+```
+
+The `useParams` hook extracts the ID, which is then used to find the matching movie from the data:
+
+```javascript
+const { id } = useParams();
+const foundPelicula = mockPeliculas.find(m => m.id === parseInt(id));
+```
+
+<Info>
+  The ID from the URL is a string, so it's converted to an integer before comparison.
+</Info>
+
+## Loading State
+
+A simulated 500ms loading delay provides realistic UX:
+
+```javascript
+const timer = setTimeout(() => {
+  const foundPelicula = mockPeliculas.find(m => m.id === parseInt(id));
+  if (foundPelicula) {
+    setPelicula(foundPelicula);
+  }
+  setLoading(false);
+}, 500);
+
+if (loading) {
+  return <LoadingSpinner />;
+}
+```
+
+This prevents jarring instant loads and gives the app a more polished feel.
+
+## Not Found Handling
+
+If the movie ID doesn't exist, users see a helpful error page:
+
+```jsx
+if (!pelicula) {
+  return (
+    <div className="pelicula-detail__not-found">
+      <h2>Película no encontrada</h2>
+      <button 
+        onClick={() => navigate('/peliculas')} 
+        className="pelicula-detail__back-btn"
+      >
+        Volver al catálogo
+      </button>
+    </div>
+  );
+}
+```
+
+<Tip>
+  The "back to catalog" button uses React Router's `navigate` function for instant, client-side navigation.
+</Tip>
+
+## Information Display
+
+The detail page shows comprehensive movie information:
+
+### Hero Section
+
+```jsx
+<div className="pelicula-detail__container">
+  <div className="pelicula-detail__image-container">
+    <img 
+      src={pelicula.image} 
+      alt={pelicula.title}
+      className="pelicula-detail__image"
+    />
+  </div>
+
+  <div className="pelicula-detail__info">
+    <h1 className="pelicula-detail__title">{pelicula.title}</h1>
+    
+    <div className="pelicula-detail__meta">
+      <span className="pelicula-detail__year">{pelicula.year}</span>
+      <span className="pelicula-detail__genre">{pelicula.genre}</span>
+      <span className="pelicula-detail__duration">{pelicula.duration} min</span>
+      <span className="pelicula-detail__rating">⭐ {pelicula.rating}/10</span>
+    </div>
+  </div>
+</div>
+```
+
+### Metadata Fields
+
+<CardGroup cols={3}>
+  <Card title="Director" icon="person-chalkboard">
+    Full director name(s)
+  </Card>
+  <Card title="Cast" icon="users">
+    Comma-separated list of main actors
+  </Card>
+  <Card title="Language" icon="language">
+    Original audio language
+  </Card>
+</CardGroup>
+
+### Director & Cast
+
+```jsx
+<div className="pelicula-detail__director">
+  <strong>Director:</strong> {pelicula.director}
+</div>
+
+<div className="pelicula-detail__cast">
+  <strong>Reparto:</strong> {pelicula.cast.join(', ')}
+</div>
+
+<div className="pelicula-detail__language">
+  <strong>Idioma:</strong> {pelicula.language}
+</div>
+```
+
+**Example Output**:
+- **Director**: Christopher Nolan
+- **Reparto**: Leonardo DiCaprio, Joseph Gordon-Levitt, Elliot Page
+- **Idioma**: Inglés
+
+### Synopsis
+
+```jsx
+<div className="pelicula-detail__synopsis">
+  <h3>Sinopsis</h3>
+  <p>{pelicula.synopsis}</p>
+</div>
+```
+
+The synopsis provides a brief plot description to help users decide if they want to watch the movie.
+
+## Action Buttons
+
+Three primary actions are available on the detail page:
+
+```jsx
+<div className="pelicula-detail__actions">
+  <button 
+    className="pelicula-detail__trailer-btn"
+    onClick={() => setShowTrailer(true)}
+  >
+    Ver Tráiler
+  </button>
+  <RentalButton pelicula={pelicula} onRent={handleRent} />
+  <PurchaseButton pelicula={pelicula} onPurchase={handlePurchase} />
+</div>
+```
+
+### 1. Watch Trailer
+
+Clicking "Ver Tráiler" opens a modal with an embedded YouTube video:
+
+```jsx
+const [showTrailer, setShowTrailer] = useState(false);
+
+// In JSX:
+{showTrailer && (
+  <TrailerModal 
+    pelicula={pelicula} 
+    onClose={() => setShowTrailer(false)} 
+  />
+)}
+```
+
+The trailer modal:
+- Embeds YouTube iframe with the movie's trailer
+- Locks body scrolling while open
+- Closes on ESC key or backdrop click
+- Provides immersive full-screen experience
+
+<Note>
+  Trailer URLs are stored as YouTube embed links (e.g., "https://www.youtube.com/embed/YoHD9XEInc0").
+</Note>
+
+### 2. Rent Movie
+
+The `RentalButton` allows 48-hour rentals:
+
+```javascript
+const handleRent = (rentedPelicula) => {
+  const newAlquileres = [
+    ...alquileres, 
+    { ...rentedPelicula, alquilerDate: new Date().toISOString() }
+  ];
+  setAlquileres(newAlquileres);
+  localStorage.setItem('alquileres', JSON.stringify(newAlquileres));
+};
+```
+
+**User Experience**:
+1. Click "Alquilar por S/ 3.99"
+2. Button shows "Procesando..."
+3. Alert confirms rental
+4. Movie added to "Mis Alquileres"
+
+### 3. Purchase Movie
+
+The `PurchaseButton` enables permanent ownership:
+
+```javascript
+const handlePurchase = (compradPelicula) => {
+  const newCompras = [
+    ...compras, 
+    { ...compradPelicula, compraDate: new Date().toISOString() }
+  ];
+  setCompras(newCompras);
+  localStorage.setItem('compras', JSON.stringify(newCompras));
+};
+```
+
+**User Experience**:
+1. Click "Comprar por €12.99"
+2. Button shows "Procesando..."
+3. Alert confirms purchase
+4. Movie added to "Mis Compras"
+
+<Info>
+  Both rental and purchase handlers add timestamp metadata (alquilerDate/compraDate) for tracking.
+</Info>
+
+## LocalStorage Integration
+
+The detail page reads and writes to localStorage for persistence:
+
+### On Page Load
+
+```javascript
+useEffect(() => {
+  const savedAlquileres = JSON.parse(localStorage.getItem('alquileres') || '[]');
+  const savedCompras = JSON.parse(localStorage.getItem('compras') || '[]');
+  setAlquileres(savedAlquileres);
+  setCompras(savedCompras);
+}, [id]);
+```
+
+### On Transaction
+
+```javascript
+// For rentals
+localStorage.setItem('alquileres', JSON.stringify(newAlquileres));
+
+// For purchases
+localStorage.setItem('compras', JSON.stringify(newCompras));
+```
+
+This ensures transactions persist across page reloads and browser sessions.
+
+## Navigation Flow
+
+Users can reach the detail page from multiple entry points:
+
+### From Catalog
+
+```jsx
+// In PeliculaCard component
+<Link to={`/pelicula/${pelicula.id}`} className="pelicula-card__details-btn">
+  Ver detalles
+</Link>
+```
+
+### From Other Pages
+
+- **Search Results**: Click any movie card
+- **Rentals Page**: View details of rented movies
+- **Purchases Page**: Access owned movie details
+- **Direct Link**: Share URL like `/pelicula/1`
+
+## Responsive Behavior
+
+The layout adapts to different screen sizes:
+
+- **Desktop**: Side-by-side poster and info panels
+- **Tablet**: Stacked layout with smaller poster
+- **Mobile**: Single column, full-width elements
+
+## Example: Inception Detail Page
+
+Here's what users see when viewing Inception (ID: 1):
+
+```
+URL: /pelicula/1
+
+┌─────────────────────────────────────────────────────┐
+│  [Large Poster]    INCEPTION                        │
+│                    2010 • Ciencia Ficción           │
+│                    148 min • ⭐ 8.8/10               │
+│                                                     │
+│                    Director: Christopher Nolan      │
+│                    Reparto: Leonardo DiCaprio,      │
+│                    Joseph Gordon-Levitt, Elliot Page│
+│                    Idioma: Inglés                   │
+│                                                     │
+│                    Sinopsis                         │
+│                    Un ladrón que roba secretos...   │
+│                                                     │
+│                    [Ver Tráiler]                    │
+│                    [Alquilar por S/ 3.99]           │
+│                    [Comprar por €12.99]             │
+└─────────────────────────────────────────────────────┘
+```
+
+## Performance Optimization
+
+The page includes several performance considerations:
+
+### Simulated Loading
+
+```javascript
+const timer = setTimeout(() => {
+  // Fetch movie
+  setLoading(false);
+}, 500);
+
+return () => clearTimeout(timer);
+```
+
+The cleanup function prevents memory leaks if users navigate away before loading completes.
+
+### Conditional Rendering
+
+Components render only when needed:
+
+```jsx
+{showTrailer && <TrailerModal ... />}
+```
+
+The trailer modal doesn't exist in the DOM until activated, saving resources.
+
+### Early Returns
+
+```jsx
+if (loading) return <LoadingSpinner />;
+if (!pelicula) return <NotFoundPage />;
+// Main render only if movie exists
+```
+
+This pattern prevents unnecessary rendering of the main UI.
+
+## Accessibility Features
+
+- **Semantic HTML**: Proper heading hierarchy (h1, h3)
+- **Alt Text**: Movie title used as image alt
+- **Button Labels**: Clear action descriptions
+- **Keyboard Support**: All buttons keyboard accessible
+- **Focus Management**: Trailer modal handles focus properly
+
+## Error Handling
+
+### Image Load Failures
+
+While the detail page doesn't have explicit image error handling, the catalog's `PeliculaCard` provides a pattern that could be implemented:
+
+```jsx
+const [imageError, setImageError] = useState(false);
+
+<img 
+  src={imageError ? 'fallback.jpg' : pelicula.image}
+  onError={() => setImageError(true)}
+/>
+```
+
+### Invalid IDs
+
+The not-found handler manages invalid or non-existent movie IDs gracefully.
+
+## Future Enhancements
+
+- **Reviews & Ratings**: User-generated reviews
+- **Related Movies**: Recommendations based on genre/director
+- **Availability Status**: Show if already rented/purchased
+- **Social Sharing**: Share movie to social media
+- **Watchlist**: Add to watchlist without renting/buying
+- **Quality Options**: HD, 4K badges and pricing
+- **Subtitles Info**: Available subtitle languages
+- **Age Rating**: MPAA/PEGI rating display
+
+## Technical Details
+
+### Component Dependencies
+
+```javascript
+import { useParams, useNavigate } from 'react-router-dom';
+import RentalButton from '../components/AlquilerButton';
+import PurchaseButton from '../components/CompraButton';
+import TrailerModal from '../components/TrailerModal';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { mockPeliculas } from '../data/mockPeliculas';
+```
+
+### State Management
+
+- `pelicula`: Current movie data
+- `loading`: Loading state for spinner
+- `showTrailer`: Modal visibility toggle
+- `alquileres`: User's rented movies
+- `compras`: User's purchased movies
+
+### Side Effects
+
+- `useEffect` with `[id]` dependency loads movie on route change
+- Cleanup function clears timeout on unmount
+- localStorage reads on mount, writes on transaction
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Movie Catalog" icon="film" href="/features/movie-catalog">
+    Return to the catalog where users discover movies
+  </Card>
+  <Card title="Search & Filter" icon="filter" href="/features/search-filter">
+    Learn how users find specific movies
+  </Card>
+</CardGroup>

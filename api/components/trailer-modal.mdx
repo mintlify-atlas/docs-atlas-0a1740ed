@@ -1,0 +1,218 @@
+---
+title: 'TrailerModal'
+description: 'Modal overlay component for displaying YouTube movie trailers'
+icon: 'video'
+---
+
+## Overview
+
+`TrailerModal` is a modal dialog component that displays a movie trailer in an embedded YouTube iframe. It includes keyboard controls (ESC to close), click-outside-to-close functionality, and prevents body scrolling while open.
+
+## Import
+
+```javascript
+import TrailerModal from '../components/TrailerModal';
+```
+
+## Props
+
+<ParamField path="pelicula" type="object" required>
+  Movie object containing trailer information
+  
+  **Required properties:**
+  - `title` (string): Movie title (displayed in modal header)
+  - `trailerUrl` (string): YouTube embed URL for the trailer
+</ParamField>
+
+<ParamField path="onClose" type="function" required>
+  Callback function invoked when the modal should be closed
+  
+  **Signature:** `() => void`
+</ParamField>
+
+## Component Signature
+
+```javascript
+const TrailerModal = ({ pelicula, onClose }) => { ... }
+```
+
+## Features
+
+### Keyboard Controls
+
+ESC key closes the modal:
+
+```javascript
+useEffect(() => {
+  const handleEsc = (e) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+  
+  document.addEventListener('keydown', handleEsc);
+  
+  return () => {
+    document.removeEventListener('keydown', handleEsc);
+  };
+}, [onClose]);
+```
+
+### Body Scroll Lock
+
+Prevents background scrolling while modal is open:
+
+```javascript
+useEffect(() => {
+  document.body.style.overflow = 'hidden';
+  
+  return () => {
+    document.body.style.overflow = 'auto';
+  };
+}, [onClose]);
+```
+
+### Click Outside to Close
+
+Clicking the modal backdrop closes the modal:
+
+```javascript
+<div className="modal" onClick={onClose}>
+  <div className="modal__content" onClick={(e) => e.stopPropagation()}>
+    {/* Modal content */}
+  </div>
+</div>
+```
+
+### YouTube Embed
+
+Embeds the trailer with full YouTube iframe features:
+
+```javascript
+<iframe
+  className="modal__video"
+  src={pelicula.trailerUrl}
+  title={`${pelicula.title} trailer`}
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+```
+
+## Usage Example
+
+<Tabs>
+  <Tab title="With State">
+    ```javascript
+    import React, { useState } from 'react';
+    import TrailerModal from '../components/TrailerModal';
+
+    const MovieDetail = () => {
+      const [showTrailer, setShowTrailer] = useState(false);
+      
+      const pelicula = {
+        title: "Inception",
+        trailerUrl: "https://www.youtube.com/embed/YoHD9XEInc0"
+      };
+
+      return (
+        <div>
+          <button onClick={() => setShowTrailer(true)}>
+            Ver Tráiler
+          </button>
+
+          {showTrailer && (
+            <TrailerModal 
+              pelicula={pelicula} 
+              onClose={() => setShowTrailer(false)} 
+            />
+          )}
+        </div>
+      );
+    };
+    ```
+  </Tab>
+  <Tab title="In PeliculaCard">
+    ```javascript
+    // From PeliculaCard component
+    const PeliculaCard = ({ pelicula }) => {
+      const [showTrailer, setShowTrailer] = useState(false);
+
+      return (
+        <>
+          <article className="pelicula-card">
+            <button onClick={() => setShowTrailer(true)}>
+              ▶ Ver Tráiler
+            </button>
+          </article>
+
+          {showTrailer && (
+            <TrailerModal 
+              pelicula={pelicula} 
+              onClose={() => setShowTrailer(false)} 
+            />
+          )}
+        </>
+      );
+    };
+    ```
+  </Tab>
+</Tabs>
+
+## Rendered Structure
+
+```jsx
+<div className="modal" onClick={onClose}>
+  <div className="modal__content" onClick={(e) => e.stopPropagation()}>
+    <button className="modal__close" onClick={onClose}>×</button>
+    <h2 className="modal__title">{pelicula.title} - Tráiler</h2>
+    <div className="modal__video-container">
+      <iframe
+        className="modal__video"
+        src={pelicula.trailerUrl}
+        title={`${pelicula.title} trailer`}
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      ></iframe>
+    </div>
+  </div>
+</div>
+```
+
+## CSS Classes
+
+- `.modal` - Full-screen backdrop overlay
+- `.modal__content` - Modal content container
+- `.modal__close` - Close button (×)
+- `.modal__title` - Modal header title
+- `.modal__video-container` - Video wrapper (for responsive sizing)
+- `.modal__video` - YouTube iframe
+
+## Closing Methods
+
+The modal can be closed in three ways:
+
+1. **ESC key** - Keyboard shortcut
+2. **Close button (×)** - Explicit close action
+3. **Click outside** - Click on backdrop overlay
+
+## Side Effects
+
+The component manages two side effects via `useEffect`:
+
+1. **Event listener** - Adds/removes ESC key handler
+2. **Body overflow** - Prevents/restores background scrolling
+
+Both are properly cleaned up when the component unmounts.
+
+## Accessibility
+
+- Semantic `<button>` for close action
+- Descriptive `title` attribute on iframe
+- Keyboard accessible (ESC to close)
+- Focus trap consideration (not implemented)
+
+## Source Location
+
+`src/components/TrailerModal.jsx:3`

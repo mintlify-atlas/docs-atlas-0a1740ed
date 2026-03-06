@@ -1,80 +1,310 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Get ReactFlix up and running in under 5 minutes
 ---
 
-## Get started in three steps
+## Get Started in 5 Minutes
 
-Get your documentation site running locally and make your first customization.
-
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+This quick start guide will have ReactFlix running on your local machine with minimal setup. Perfect for developers who want to dive right in.
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  **Prerequisites**: Ensure you have Node.js (v14+) and npm installed. Check with `node --version` and `npm --version`.
 </Note>
+
+## Quick Installation
+
+<Steps>
+  <Step title="Clone the Repository">
+    Clone the ReactFlix repository to your local machine:
+    
+    ```bash
+    git clone <repository-url>
+    cd streaming
+    ```
+  </Step>
+
+  <Step title="Install Dependencies">
+    Install all required npm packages:
+    
+    ```bash
+    npm install
+    ```
+    
+    This installs:
+    - React 19.2.4 and React DOM
+    - React Router DOM 7.13.1
+    - React Scripts 5.0.1
+    - Testing libraries
+  </Step>
+
+  <Step title="Start Development Server">
+    Launch the application in development mode:
+    
+    ```bash
+    npm start
+    ```
+    
+    The app will automatically open at [http://localhost:3000](http://localhost:3000)
+  </Step>
+</Steps>
+
+<Tip>
+  The development server supports hot reloading - changes you make to the code will automatically refresh the browser!
+</Tip>
+
+## Verify Installation
+
+Once the development server starts, you should see:
+
+1. **Homepage** - Welcome message and featured movies section
+2. **Navigation** - Header with links to Movies, Rentals, and Purchases
+3. **Movie Grid** - 4 featured movies with poster images
+4. **Interactive Elements** - Hover effects and clickable movie cards
+
+## Explore the Application
+
+### Browse Movies
+
+Navigate to the full catalog:
+
+```bash
+http://localhost:3000/peliculas
+```
+
+Try the search and filter features:
+- Search for "Matrix" or "Nolan"
+- Filter by genre: Science Fiction, Action, Drama, Crime
+- View movie details by clicking on any card
+
+### View Movie Details
+
+Click on any movie to see:
+- Full synopsis and cast information
+- Movie ratings and duration
+- Embedded trailer player
+- Rental and purchase options
+
+### Test Rental & Purchase
+
+<Steps>
+  <Step title="Select a Movie">
+    Navigate to any movie detail page
+  </Step>
+
+  <Step title="Choose Action">
+    Click either "Alquilar" (Rent) or "Comprar" (Purchase)
+  </Step>
+
+  <Step title="View Library">
+    Access your rentals at `/gestion-alquileres` or purchases at `/gestion-compras`
+  </Step>
+
+  <Step title="Manage Rentals">
+    On the rentals page, you can extend rental periods by 48 hours
+  </Step>
+</Steps>
+
+## Understanding the Code
+
+### Main Application Component
+
+The app is structured with React Router for navigation:
+
+```javascript src/App.js
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import PrincipalPage from './pages/PrincipalPage';
+import PeliculasPage from './pages/PeliculasPage';
+import PeliculaDetailPage from './pages/PeliculaDetailPage';
+import AlquileresPage from './pages/AlquileresPage';
+import ComprasPage from './pages/ComprasPage';
+
+function App() {
+  return (
+    <Router>
+      <div className="app">
+        <Header />
+        <main className="app__main">
+          <Routes>
+            <Route path="/" element={<PrincipalPage />} />
+            <Route path="/peliculas" element={<PeliculasPage />} />
+            <Route path="/pelicula/:id" element={<PeliculaDetailPage />} />
+            <Route path="/gestion-alquileres" element={<AlquileresPage />} />
+            <Route path="/gestion-compras" element={<ComprasPage />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
+  );
+}
+
+export default App;
+```
+
+### Custom Search Hook
+
+The application uses a custom hook for search and filtering:
+
+```javascript src/hooks/usePeliculaSearch.js
+import { useState, useEffect } from "react";
+import { mockPeliculas } from "../data/mockPeliculas";
+
+const usePeliculaSearch = (initialPeliculas = mockPeliculas) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [filteredPeliculas, setFilteredPeliculas] = useState(initialPeliculas);
+  const [loading, setLoading] = useState(false);
+
+  // Filter movies by search term and category
+  useEffect(() => {
+    setLoading(true);
+
+    const timer = setTimeout(() => {
+      let results = mockPeliculas;
+
+      // Search by title, director, or cast
+      if (searchTerm) {
+        results = results.filter(
+          (pelicula) =>
+            pelicula.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            pelicula.director.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            pelicula.cast.some((actor) =>
+              actor.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+        );
+      }
+
+      // Filter by genre
+      if (selectedCategory) {
+        results = results.filter(
+          (pelicula) => pelicula.genre === selectedCategory
+        );
+      }
+
+      setFilteredPeliculas(results);
+      setLoading(false);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, selectedCategory]);
+
+  return {
+    searchTerm,
+    setSearchTerm,
+    selectedCategory,
+    setSelectedCategory,
+    filteredPeliculas,
+    loading,
+    categories: [...new Set(mockPeliculas.map((p) => p.genre))]
+  };
+};
+
+export default usePeliculaSearch;
+```
+
+## Available Routes
+
+| Route | Component | Description |
+|-------|-----------|-------------|
+| `/` | PrincipalPage | Homepage with featured movies |
+| `/peliculas` | PeliculasPage | Full catalog with search/filter |
+| `/pelicula/:id` | PeliculaDetailPage | Individual movie details |
+| `/gestion-alquileres` | AlquileresPage | Manage rented movies |
+| `/gestion-compras` | ComprasPage | Manage purchased movies |
+
+## Development Commands
+
+<CodeGroup>
+
+```bash Start Development Server
+npm start
+# Opens http://localhost:3000
+# Hot reload enabled
+```
+
+```bash Run Tests
+npm test
+# Launches test runner in watch mode
+# Tests automatically re-run on file changes
+```
+
+```bash Build for Production
+npm run build
+# Creates optimized production build
+# Output in /build directory
+```
+
+</CodeGroup>
+
+## Data Storage
+
+ReactFlix uses browser LocalStorage to persist user data:
+
+```javascript
+// Rentals stored in localStorage
+localStorage.setItem('alquileres', JSON.stringify(rentedMovies));
+const alquileres = JSON.parse(localStorage.getItem('alquileres') || '[]');
+
+// Purchases stored in localStorage
+localStorage.setItem('compras', JSON.stringify(purchasedMovies));
+const compras = JSON.parse(localStorage.getItem('compras') || '[]');
+```
+
+<Warning>
+  LocalStorage data is browser-specific and will be lost if you clear browser data. For production, consider implementing backend storage.
+</Warning>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Installation Guide" icon="book" href="/installation">
+    Learn about detailed setup, prerequisites, and configuration options
+  </Card>
+  <Card title="Component Reference" icon="puzzle-piece" href="/components/overview">
+    Explore all available components and their props
+  </Card>
+  <Card title="Customization" icon="wrench" href="/guides/customization">
+    Customize ReactFlix with your own branding and features
+  </Card>
+  <Card title="Data Management" icon="database" href="/guides/data-management">
+    Learn how to manage movie data and integrate APIs
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+### Port Already in Use
+
+If port 3000 is already in use:
+
+```bash
+# On macOS/Linux
+lsof -ti:3000 | xargs kill -9
+
+# Or set a different port
+PORT=3001 npm start
+```
+
+### Module Not Found
+
+If you encounter module errors:
+
+```bash
+# Clear node_modules and reinstall
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### White Screen on Start
+
+Check the browser console for errors and ensure:
+- All dependencies are installed
+- You're using Node.js v14 or higher
+- No syntax errors in recent code changes
+
+<Tip>
+  Need help? Check the browser console (F12) for detailed error messages.
+</Tip>

@@ -1,0 +1,139 @@
+---
+title: Component Library
+description: Overview of ReactFlix reusable React components
+icon: puzzle-piece
+---
+
+# Component Library
+
+ReactFlix is built with a modular component architecture that promotes reusability and maintainability. The component library includes display components for movies, navigation elements, and interactive modals.
+
+## Component Architecture
+
+The components follow React functional component patterns with hooks for state management:
+
+- **Presentational Components**: Pure components that receive data via props
+- **Container Components**: Components with internal state using `useState` and `useEffect`
+- **Controlled Components**: Form elements controlled by parent state
+
+## Component Categories
+
+<CardGroup cols={2}>
+  <Card title="Movie Display" icon="film" href="/components/movie-card">
+    Components for displaying movie information, including cards and grids
+  </Card>
+  
+  <Card title="Search & Filter" icon="filter" href="/components/search-bar">
+    Interactive components for searching and filtering movie content
+  </Card>
+  
+  <Card title="Modals" icon="window" href="/components/trailer-modal">
+    Modal dialogs for trailers and interactive content
+  </Card>
+  
+  <Card title="Layout" icon="layout" href="#layout-components">
+    Header, footer, and navigation components
+  </Card>
+</CardGroup>
+
+## Core Components
+
+### Movie Display Components
+
+- **[PeliculaCard](/components/movie-card)** - Individual movie card with poster, metadata, and actions
+- **[PeliculaGrid](/components/movie-grid)** - Responsive grid layout for displaying multiple movies
+
+### Interactive Components
+
+- **[SearchBar](/components/search-bar)** - Text input for searching movies by title, director, or actor
+- **[CategoryFilter](/components/category-filter)** - Dropdown for filtering movies by genre
+- **[TrailerModal](/components/trailer-modal)** - Full-screen modal for displaying movie trailers
+
+### Layout Components
+
+- **Header** - Main navigation header with logo and menu links
+- **Footer** - Site footer with links and contact information
+- **LoadingSpinner** - Loading indicator for async operations
+
+## Styling Approach
+
+All components use BEM (Block Element Modifier) naming convention for CSS classes:
+
+```jsx
+<div className="component-name">
+  <div className="component-name__element">
+    <button className="component-name__button component-name__button--active">
+      Click me
+    </button>
+  </div>
+</div>
+```
+
+This ensures predictable, maintainable styling without conflicts.
+
+## State Management Patterns
+
+<Tabs>
+  <Tab title="Local State">
+    Components like `PeliculaCard` use local state for UI interactions:
+    
+    ```jsx
+    const [showTrailer, setShowTrailer] = useState(false);
+    const [imageError, setImageError] = useState(false);
+    ```
+  </Tab>
+  
+  <Tab title="Prop Callbacks">
+    Parent components pass down callback functions for state updates:
+    
+    ```jsx
+    <SearchBar 
+      searchTerm={searchTerm} 
+      onSearchChange={setSearchTerm} 
+    />
+    ```
+  </Tab>
+  
+  <Tab title="Effects">
+    Side effects are managed with `useEffect` for cleanup and event listeners:
+    
+    ```jsx
+    useEffect(() => {
+      document.addEventListener('keydown', handleEsc);
+      return () => document.removeEventListener('keydown', handleEsc);
+    }, [onClose]);
+    ```
+  </Tab>
+</Tabs>
+
+## Import Patterns
+
+Components can be imported individually:
+
+```jsx
+import PeliculaCard from './components/PeliculaCard';
+import PeliculaGrid from './components/PeliculaGrid';
+import SearchBar from './components/SearchBar';
+import CategoryFilter from './components/CategoryFilter';
+import TrailerModal from './components/TrailerModal';
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Movie Card" icon="id-card" href="/components/movie-card">
+    Learn about the PeliculaCard component and its props
+  </Card>
+  
+  <Card title="Movie Grid" icon="table-cells" href="/components/movie-grid">
+    Understand the grid layout system
+  </Card>
+  
+  <Card title="Search Bar" icon="magnifying-glass" href="/components/search-bar">
+    Implement search functionality
+  </Card>
+  
+  <Card title="Trailer Modal" icon="circle-play" href="/components/trailer-modal">
+    Add video playback modals
+  </Card>
+</CardGroup>

@@ -1,0 +1,733 @@
+---
+title: Styling
+description: Explore ReactFlix's styling approach using vanilla CSS with BEM methodology
+---
+
+ReactFlix uses a traditional CSS approach with well-organized stylesheets and BEM (Block Element Modifier) naming conventions. This guide covers the styling architecture, patterns, and customization options.
+
+## Styling Architecture
+
+ReactFlix uses three main CSS files for organization:
+
+<Steps>
+  <Step title="App.css - Global Styles">
+    **Location**: `src/styles/App.css`
+    
+    **Purpose**: Global resets, body styles, and app-level layout
+    
+    **Size**: 31 lines
+    
+    ```css
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto';
+      background-color: #141414;
+      color: #ffffff;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app__main {
+      flex: 1;
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    ```
+  </Step>
+  
+  <Step title="components.css - Component Styles">
+    **Location**: `src/styles/components.css`
+    
+    **Purpose**: Styles for all reusable components
+    
+    **Size**: 411 lines
+    
+    **Includes**:
+    - Header navigation
+    - Footer layout
+    - Movie cards
+    - Search bar
+    - Filter controls
+    - Buttons
+    - Modals
+    - Loading spinner
+  </Step>
+  
+  <Step title="pages.css - Page Styles">
+    **Location**: `src/styles/pages.css`
+    
+    **Purpose**: Page-specific layouts and sections
+    
+    **Size**: 257 lines
+    
+    **Includes**:
+    - Home page hero
+    - Catalog page layout
+    - Detail page grid
+    - Management pages
+    - Responsive breakpoints
+  </Step>
+</Steps>
+
+### Import Order
+
+Styles are imported in `src/App.js:10` in a specific order:
+
+```javascript
+import './styles/App.css';        // Global styles first
+import './styles/components.css'; // Components second
+import './styles/pages.css';      // Pages last
+```
+
+<Note>
+This import order ensures proper CSS cascade and specificity management.
+</Note>
+
+## BEM Methodology
+
+ReactFlix follows BEM (Block Element Modifier) naming convention throughout:
+
+### BEM Structure
+
+<Accordion title="Block">
+**Definition**: Standalone component with independent meaning
+
+**Pattern**: `.block-name`
+
+**Example**:
+```css
+.header { }
+.pelicula-card { }
+.search-bar { }
+```
+</Accordion>
+
+<Accordion title="Element">
+**Definition**: Part of a block with no standalone meaning
+
+**Pattern**: `.block-name__element-name`
+
+**Example**:
+```css
+.header__logo { }
+.header__nav { }
+.header__nav-list { }
+.pelicula-card__image { }
+.pelicula-card__title { }
+```
+</Accordion>
+
+<Accordion title="Modifier">
+**Definition**: Different state or version of a block/element
+
+**Pattern**: `.block-name--modifier-name`
+
+**Example**:
+```css
+.header__nav-link--active { }
+.button--disabled { }
+.modal--open { }
+```
+</Accordion>
+
+### Real Examples
+
+**Header Component** (`src/styles/components.css:1`):
+
+```css
+/* Block */
+.header {
+  background-color: #000000;
+  padding: 15px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Element */
+.header__container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+}
+
+.header__logo {
+  text-decoration: none;
+  color: #e50914;
+  font-size: 24px;
+}
+
+.header__nav-link {
+  color: #ffffff;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+/* Modifier */
+.header__nav-link--active {
+  color: #e50914;
+  font-weight: bold;
+}
+```
+
+**Movie Card** (`src/styles/components.css:114`):
+
+```css
+.pelicula-card {
+  background-color: #1f1f1f;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s;
+}
+
+.pelicula-card:hover {
+  transform: scale(1.05);
+  z-index: 10;
+}
+
+.pelicula-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pelicula-card__title {
+  font-size: 16px;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+```
+
+## Color Palette
+
+ReactFlix uses a dark theme inspired by streaming platforms:
+
+<CardGroup cols={2}>
+  <Card title="Primary Red" icon="palette">
+    `#e50914` - Brand color for accents and CTAs
+  </Card>
+  <Card title="Dark Background" icon="moon">
+    `#141414` - Main background color
+  </Card>
+  <Card title="Card Background" icon="square">
+    `#1f1f1f` - Component/card backgrounds
+  </Card>
+  <Card title="Black" icon="circle">
+    `#000000` - Header/footer backgrounds
+  </Card>
+  <Card title="White Text" icon="font">
+    `#ffffff` - Primary text color
+  </Card>
+  <Card title="Gray Text" icon="text">
+    `#999` - Secondary/meta text
+  </Card>
+  <Card title="Accent Gold" icon="star">
+    `#ffd700` - Rating stars
+  </Card>
+  <Card title="Rental Blue" icon="clock">
+    `#2196f3` - Rental buttons
+  </Card>
+  <Card title="Purchase Green" icon="shopping-cart">
+    `#4caf50` - Purchase buttons
+  </Card>
+  <Card title="Border Gray" icon="border-all">
+    `#333` / `#444` - Borders and dividers
+  </Card>
+</CardGroup>
+
+### Color Usage
+
+```css
+/* Brand color - headers, links, CTAs */
+color: #e50914;
+
+/* Backgrounds */
+background-color: #141414; /* Body */
+background-color: #1f1f1f; /* Cards */
+background-color: #000000; /* Header/Footer */
+
+/* Text */
+color: #ffffff; /* Primary */
+color: #999;    /* Secondary */
+color: #666;    /* Tertiary */
+
+/* Accents */
+color: #ffd700; /* Ratings */
+background-color: #2196f3; /* Rental actions */
+background-color: #4caf50; /* Purchase actions */
+background-color: #ff9800; /* Extension actions */
+```
+
+## Typography
+
+ReactFlix uses system fonts for optimal performance and native feel:
+
+```css
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
+```
+
+### Font Sizes
+
+| Element | Size | Location |
+|---------|------|----------|
+| Logo | 24px | `components.css:23` |
+| Hero Title | 48px | `pages.css:12` |
+| Page Titles | 36px | `pages.css:38` |
+| Section Titles | 32px | `pages.css:27` |
+| Card Titles | 16px | `components.css:182` |
+| Nav Links | 16px | `components.css:40` |
+| Body Text | 16px | Default |
+| Meta Text | 14px | `components.css:192` |
+
+### Font Smoothing
+
+```css
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+```
+
+<Tip>
+Antialiasing improves text rendering on macOS and high-DPI displays.
+</Tip>
+
+## Layout Patterns
+
+### Flexbox Layouts
+
+ReactFlix uses Flexbox for most layouts:
+
+<Accordion title="Header Layout">
+```css
+.header__container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header__nav-list {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+}
+```
+</Accordion>
+
+<Accordion title="App Layout">
+```css
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app__main {
+  flex: 1; /* Fills available space */
+}
+```
+</Accordion>
+
+<Accordion title="Detail Page Layout">
+```css
+.pelicula-detail__container {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 40px;
+}
+
+.pelicula-detail__actions {
+  display: flex;
+  gap: 15px;
+}
+```
+</Accordion>
+
+### Grid Layouts
+
+**Movie Grid** (`src/styles/components.css:221`):
+
+```css
+.pelicula-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+```
+
+<Note>
+`auto-fill` with `minmax` creates a responsive grid that automatically adjusts columns based on available space.
+</Note>
+
+**Footer Grid** (`src/styles/components.css:74`):
+
+```css
+.footer__container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+}
+```
+
+### Centering Content
+
+```css
+.app__main {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+```
+
+This pattern:
+1. Sets maximum width
+2. Centers with `margin: 0 auto`
+3. Allows shrinking with `width: 100%`
+
+## Interactive States
+
+### Hover Effects
+
+ReactFlix implements smooth hover transitions:
+
+<Accordion title="Card Hover">
+```css
+.pelicula-card {
+  transition: transform 0.3s;
+}
+
+.pelicula-card:hover {
+  transform: scale(1.05);
+  z-index: 10;
+}
+
+.pelicula-card__image {
+  transition: transform 0.3s;
+}
+
+.pelicula-card:hover .pelicula-card__image {
+  transform: scale(1.1);
+}
+```
+
+**Effect**: Card grows 5%, image grows 10% on hover
+</Accordion>
+
+<Accordion title="Link Hover">
+```css
+.header__nav-link {
+  color: #ffffff;
+  transition: color 0.3s;
+}
+
+.header__nav-link:hover {
+  color: #e50914;
+}
+```
+
+**Effect**: Links transition to brand red on hover
+</Accordion>
+
+<Accordion title="Button Hover">
+```css
+.alquiler-button {
+  background-color: #2196f3;
+  transition: all 0.3s;
+}
+
+.alquiler-button:hover:not(:disabled) {
+  background-color: #1976d2;
+}
+```
+
+**Effect**: Buttons darken on hover (unless disabled)
+</Accordion>
+
+### Overlay Effects
+
+**Card Overlay** (`src/styles/components.css:145`):
+
+```css
+.pelicula-card__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.pelicula-card:hover .pelicula-card__overlay {
+  opacity: 1;
+}
+```
+
+### Focus States
+
+```css
+.search-bar__input:focus,
+.category-filter__select:focus {
+  outline: none;
+  border-color: #e50914;
+}
+```
+
+<Warning>
+When removing default outline with `outline: none`, always provide alternative focus indicators for accessibility.
+</Warning>
+
+## Animations
+
+### Loading Spinner
+
+**Keyframes** (`src/styles/components.css:400`):
+
+```css
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner__circle {
+  width: 50px;
+  height: 50px;
+  border: 3px solid #333;
+  border-top-color: #e50914;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+```
+
+### Transition Properties
+
+Common transition patterns:
+
+```css
+/* Fast interactions */
+transition: color 0.3s;
+transition: background-color 0.3s;
+
+/* Transforms */
+transition: transform 0.3s;
+
+/* Multiple properties */
+transition: all 0.3s;
+```
+
+## Responsive Design
+
+ReactFlix includes responsive styles in `src/styles/pages.css:213`:
+
+### Mobile Breakpoint
+
+```css
+@media (max-width: 768px) {
+  /* Header stacks vertically */
+  .header__container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  /* Nav wraps */
+  .header__nav-list {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  /* Footer single column */
+  .footer__container {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  /* Filters stack */
+  .peliculas-page__filters {
+    grid-template-columns: 1fr;
+  }
+
+  /* Detail page single column */
+  .pelicula-detail__container {
+    grid-template-columns: 1fr;
+  }
+
+  /* Detail image centered */
+  .pelicula-detail__image {
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  /* Smaller hero title */
+  .principal-page__title {
+    font-size: 32px;
+  }
+}
+```
+
+<Note>
+The 768px breakpoint targets tablet and mobile devices. Consider adding more breakpoints for fine-grained control.
+</Note>
+
+## Modal Styling
+
+**Full-screen Modal** (`src/styles/components.css:324`):
+
+```css
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal__content {
+  position: relative;
+  width: 90%;
+  max-width: 800px;
+  background-color: #1f1f1f;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.modal__video-container {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.modal__video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+```
+
+<Tip>
+The padding-bottom percentage trick maintains 16:9 aspect ratio for responsive video embeds.
+</Tip>
+
+## Customization Guide
+
+### Changing Colors
+
+To change the brand color, update these values:
+
+```css
+/* Primary brand color */
+.header__logo { color: #YOUR_COLOR; }
+.header__nav-link--active { color: #YOUR_COLOR; }
+.footer__title { color: #YOUR_COLOR; }
+.pelicula-card__trailer-btn { background-color: #YOUR_COLOR; }
+.principal-page__title { color: #YOUR_COLOR; }
+/* ... and more */
+```
+
+<Tip>
+Use CSS custom properties (variables) for easier theming:
+
+```css
+:root {
+  --brand-color: #e50914;
+  --bg-dark: #141414;
+  --bg-card: #1f1f1f;
+}
+
+.header__logo {
+  color: var(--brand-color);
+}
+```
+</Tip>
+
+### Adjusting Spacing
+
+```css
+/* Main content padding */
+.app__main {
+  padding: 20px; /* Change to 40px for more space */
+}
+
+/* Grid gap */
+.pelicula-grid {
+  gap: 20px; /* Change to 30px for wider gaps */
+}
+```
+
+### Modifying Typography
+
+```css
+/* Change font family */
+body {
+  font-family: 'Your Font', sans-serif;
+}
+
+/* Adjust sizes */
+.principal-page__title {
+  font-size: 48px; /* Change to 64px for larger hero */
+}
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Follow BEM" icon="cubes">
+    Maintain BEM naming for consistency and maintainability
+  </Card>
+  <Card title="Organize by Feature" icon="folder-tree">
+    Keep related styles together in logical groups
+  </Card>
+  <Card title="Use Transitions" icon="arrows-spin">
+    Add transitions for smooth, professional interactions
+  </Card>
+  <Card title="Mobile First" icon="mobile">
+    Consider mobile layout when adding new styles
+  </Card>
+  <Card title="Avoid !important" icon="ban">
+    Use specificity instead of !important flags
+  </Card>
+  <Card title="Consistent Spacing" icon="ruler">
+    Use multiples of 5 or 10 for padding/margin values
+  </Card>
+</CardGroup>
+
+## Related Guides
+
+<CardGroup cols={2}>
+  <Card title="Customization" icon="wrench" href="/guides/customization">
+    Learn how to customize the application appearance
+  </Card>
+  <Card title="Project Structure" icon="folder-tree" href="/guides/project-structure">
+    Understand how styles are organized in the project
+  </Card>
+</CardGroup>

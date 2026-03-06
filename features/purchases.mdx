@@ -1,0 +1,402 @@
+---
+title: 'Movie Purchases'
+description: 'Buy movies for permanent access to your digital library'
+icon: 'shopping-cart'
+---
+
+## Overview
+
+ReactFlix allows users to purchase movies for permanent, unlimited access. Purchased movies are stored in the browser's localStorage and can be accessed anytime from the "Mis Compras" (My Purchases) page.
+
+## How Purchases Work
+
+### Purchase Process
+
+<CardGroup cols={3}>
+  <Card title="1. Select" icon="film">
+    Choose a movie from the catalog or detail page
+  </Card>
+  <Card title="2. Buy" icon="credit-card">
+    Click the "Comprar" button with purchase price
+  </Card>
+  <Card title="3. Own Forever" icon="infinity">
+    Unlimited access with no expiration
+  </Card>
+</CardGroup>
+
+## Purchase Button Component
+
+The `CompraButton` (PurchaseButton) manages the buying transaction:
+
+```jsx
+const PurchaseButton = ({ pelicula, onPurchase }) => {
+  const [isPurchasing, setIsPurchasing] = useState(false);
+
+  const handlePurchase = () => {
+    setIsPurchasing(true);
+    
+    // Simulate purchase processing
+    setTimeout(() => {
+      onPurchase(pelicula);
+      setIsPurchasing(false);
+      alert(`¡Has comprado ${pelicula.title} por ${pelicula.price}€!`);
+    }, 500);
+  };
+
+  return (
+    <button 
+      className="compra-button"
+      onClick={handlePurchase}
+      disabled={isPurchasing}
+    >
+      {isPurchasing ? 'Procesando...' : `Comprar por ${pelicula.price}€`}
+    </button>
+  );
+};
+```
+
+### Button States
+
+- **Default**: Shows purchase price (e.g., "Comprar por 12.99€")
+- **Processing**: Displays "Procesando..." during transaction
+- **Disabled**: Button disabled during processing to prevent duplicate purchases
+
+<Note>
+  The purchase button uses Euro (€) currency, while rentals use Peruvian Sol (S/). This is a quirk of the demo app that could be standardized in production.
+</Note>
+
+## LocalStorage Persistence
+
+Purchases are permanently stored in the browser's localStorage:
+
+### Saving Purchases
+
+When a user buys a movie, it's saved with a purchase timestamp:
+
+```javascript
+const handlePurchase = (compradPelicula) => {
+  const newCompras = [
+    ...compras, 
+    { 
+      ...compradPelicula, 
+      compraDate: new Date().toISOString() 
+    }
+  ];
+  setCompras(newCompras);
+  localStorage.setItem('compras', JSON.stringify(newCompras));
+};
+```
+
+### Loading Purchases
+
+The "Mis Compras" (My Purchases) page loads all purchases on mount:
+
+```javascript
+useEffect(() => {
+  const savedCompras = JSON.parse(localStorage.getItem('compras') || '[]');
+  setCompras(savedCompras);
+  setLoading(false);
+}, []);
+```
+
+<Info>
+  Purchase dates are stored as ISO 8601 strings (e.g., "2026-03-06T14:30:00.000Z"), useful for sorting and displaying purchase history.
+</Info>
+
+## My Purchases Page
+
+The `ComprasPage` displays the user's complete movie library:
+
+```jsx
+const MyComprasPage = () => {
+  const [compras, setCompras] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const savedCompras = JSON.parse(localStorage.getItem('compras') || '[]');
+    setCompras(savedCompras);
+    setLoading(false);
+  }, []);
+
+  return (
+    <div className="gestion-compras-page">
+      <h1 className="gestion-compras-page__title">Mis Compras</h1>
+      
+      {compras.length === 0 ? (
+        <div className="gestion-compras-page__empty">
+          <p>No tienes películas compradas</p>
+        </div>
+      ) : (
+        <PeliculaGrid peliculas={compras} loading={loading} />
+      )}
+    </div>
+  );
+};
+```
+
+## Library Features
+
+### Visual Display
+
+Purchased movies appear in a familiar grid layout:
+
+- **Movie Posters**: Full collection displayed visually
+- **Metadata**: Title, year, duration, rating
+- **Unlimited Access**: No expiration dates or restrictions
+- **Quick Actions**: Watch trailers, view details anytime
+
+### Empty State
+
+New users see a helpful message when their library is empty:
+
+```jsx
+{compras.length === 0 ? (
+  <div className="gestion-compras-page__empty">
+    <p>No tienes películas compradas</p>
+  </div>
+) : (
+  <PeliculaGrid peliculas={compras} loading={loading} />
+)}
+```
+
+<Tip>
+  The empty state could be enhanced with a call-to-action button linking to the catalog to encourage first purchases.
+</Tip>
+
+## Purchase Workflow
+
+### From Movie Detail Page
+
+1. **Browse**: User views movie detail page
+2. **Compare**: See both rental (S/ 3.99) and purchase (12.99€) options
+3. **Decide**: Choose purchase for permanent access
+4. **Click Buy**: Button shows "Procesando..."
+5. **Confirmation**: Alert confirms successful purchase
+6. **Access**: Movie appears in "Mis Compras" library
+
+### Accessing Library
+
+1. **Navigate**: Click "Mis Compras" in site navigation
+2. **View Collection**: All owned movies displayed in grid
+3. **Enjoy**: Watch trailers or full movies anytime
+4. **Re-watch**: No limits on viewing frequency
+
+## Data Structure
+
+Purchase objects in localStorage include:
+
+```javascript
+{
+  // Complete movie data
+  id: 1,
+  title: "Inception",
+  director: "Christopher Nolan",
+  year: 2010,
+  genre: "Ciencia Ficción",
+  duration: 148,
+  synopsis: "Un ladrón que roba secretos corporativos...",
+  image: "https://...",
+  trailerUrl: "https://www.youtube.com/embed/...",
+  price: 12.99,
+  alquilerPrecio: 3.99,
+  rating: 8.8,
+  language: "Inglés",
+  cast: ["Leonardo DiCaprio", "Joseph Gordon-Levitt", "Elliot Page"],
+  // Purchase-specific data
+  compraDate: "2026-03-06T14:30:00.000Z"
+}
+```
+
+## Integration with Detail Page
+
+The movie detail page offers both rental and purchase options side-by-side:
+
+```jsx
+const PeliculaDetailPage = () => {
+  const [compras, setCompras] = useState([]);
+
+  useEffect(() => {
+    const savedCompras = JSON.parse(localStorage.getItem('compras') || '[]');
+    setCompras(savedCompras);
+  }, []);
+
+  const handlePurchase = (compradPelicula) => {
+    const newCompras = [
+      ...compras, 
+      { ...compradPelicula, compraDate: new Date().toISOString() }
+    ];
+    setCompras(newCompras);
+    localStorage.setItem('compras', JSON.stringify(newCompras));
+  };
+
+  return (
+    <div className="pelicula-detail__actions">
+      <button className="pelicula-detail__trailer-btn">Ver Tráiler</button>
+      <RentalButton pelicula={pelicula} onRent={handleRent} />
+      <PurchaseButton pelicula={pelicula} onPurchase={handlePurchase} />
+    </div>
+  );
+};
+```
+
+## Pricing Overview
+
+Purchase prices range from €9.99 to €14.99:
+
+| Movie | Purchase Price | Rental Price | Savings vs. 5 Rentals |
+|-------|----------------|--------------|------------------------|
+| The Matrix | €9.99 | S/ 2.99 | 33% |
+| Pulp Fiction | €10.99 | S/ 2.99 | 39% |
+| Gladiator | €10.99 | S/ 2.99 | 39% |
+| The Dark Knight | €11.99 | S/ 3.49 | 31% |
+| Inception | €12.99 | S/ 3.99 | 35% |
+| Avatar | €12.99 | S/ 3.99 | 35% |
+| The Godfather | €13.99 | S/ 3.99 | 40% |
+| Interstellar | €14.99 | S/ 4.99 | 40% |
+
+<Info>
+  Purchasing becomes cost-effective after approximately 3-5 rentals, depending on the movie.
+</Info>
+
+## User Experience
+
+### Visual Feedback
+
+- **Button Animation**: Processing state prevents confusion
+- **Confirmation Alert**: Immediate success message with price
+- **Library Update**: Purchase appears instantly in "Mis Compras"
+- **Loading States**: Smooth spinner while fetching library
+
+### Navigation Flow
+
+Users can access purchases from:
+
+- **Header Navigation**: "Mis Compras" link always visible
+- **Post-Purchase**: Confirmation message can link to library
+- **Profile/Account**: Natural place for library access
+
+## Component Architecture
+
+```
+ComprasPage (Page)
+└── PeliculaGrid (Display library)
+    └── PeliculaCard (Individual purchase)
+        ├── Movie Poster
+        ├── Metadata
+        └── TrailerModal (Watch trailers)
+```
+
+## Rental vs. Purchase Decision
+
+### When to Rent
+
+- **One-time viewing**: Only plan to watch once
+- **Budget conscious**: Lower upfront cost
+- **Testing**: Want to preview before buying
+- **Time-sensitive**: Don't need long-term access
+
+### When to Purchase
+
+- **Favorites**: Movies you'll watch multiple times
+- **Collection building**: Creating a digital library
+- **Convenience**: Unlimited, permanent access
+- **Cost-effective**: Better value after 3-5 viewings
+
+<Tip>
+  The side-by-side display of both options on the detail page helps users make informed decisions based on their viewing habits.
+</Tip>
+
+## Technical Considerations
+
+### Storage
+
+- **localStorage Limit**: Typically 5-10 MB
+- **Movie Data**: Each movie ~1-2 KB
+- **Capacity**: Can store hundreds of purchases
+- **Persistence**: Survives browser restarts
+
+### Browser Compatibility
+
+```javascript
+// Check localStorage availability
+if (typeof(Storage) !== "undefined") {
+  // localStorage supported
+  localStorage.setItem('compras', JSON.stringify(newCompras));
+} else {
+  // Fallback to in-memory storage or show error
+  console.error("localStorage not supported");
+}
+```
+
+<Note>
+  All modern browsers support localStorage. However, data is lost if users clear browser data or use private/incognito mode.
+</Note>
+
+## Security Considerations
+
+### Current Implementation
+
+- **Client-side Only**: All data stored locally
+- **No Authentication**: No user accounts
+- **No Payment**: Simulated transactions
+
+### Production Recommendations
+
+- **User Accounts**: Cloud-based purchase history
+- **Payment Gateway**: Stripe, PayPal integration
+- **DRM**: Digital rights management for content
+- **License Verification**: Server-side validation
+- **Cross-device Sync**: Access library on any device
+
+## Duplicate Prevention
+
+The current implementation allows duplicate purchases. Consider adding:
+
+```javascript
+const handlePurchase = (compradPelicula) => {
+  // Check if already purchased
+  const alreadyOwned = compras.some(c => c.id === compradPelicula.id);
+  
+  if (alreadyOwned) {
+    alert('Ya has comprado esta película');
+    return;
+  }
+  
+  // Proceed with purchase
+  const newCompras = [
+    ...compras, 
+    { ...compradPelicula, compraDate: new Date().toISOString() }
+  ];
+  setCompras(newCompras);
+  localStorage.setItem('compras', JSON.stringify(newCompras));
+};
+```
+
+## Future Enhancements
+
+- **Purchase History**: Show purchase dates and sorting options
+- **Wishlist**: Save movies for future purchase
+- **Gift Purchases**: Buy movies for others
+- **Bundles**: Discounted multi-movie packages
+- **Collections**: Create custom playlists
+- **Sharing**: Share owned movies with family accounts
+- **Download**: Offline viewing capability
+- **Quality Options**: HD, 4K purchase tiers
+
+## Analytics Opportunities
+
+- **Conversion Rate**: Rental to purchase conversion
+- **Popular Purchases**: Most-bought movies
+- **Revenue Tracking**: Total purchase value
+- **User Behavior**: Browse-to-buy time
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Movie Rentals" icon="clock" href="/features/rentals">
+    Compare with the rental system for temporary access
+  </Card>
+  <Card title="Movie Details" icon="circle-info" href="/features/movie-details">
+    See where purchase options are displayed
+  </Card>
+</CardGroup>

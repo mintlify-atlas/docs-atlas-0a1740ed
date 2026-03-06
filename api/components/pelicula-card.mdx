@@ -1,0 +1,144 @@
+---
+title: 'PeliculaCard'
+description: 'Displays a movie card with image, metadata, and interactive trailer button'
+icon: 'rectangle-wide'
+---
+
+## Overview
+
+`PeliculaCard` is a presentation component that renders a single movie as a card with poster image, title, year, duration, rating, and a link to the detail page. It includes an overlay button to open the trailer modal.
+
+## Import
+
+```javascript
+import PeliculaCard from '../components/PeliculaCard';
+```
+
+## Props
+
+<ParamField path="pelicula" type="object" required>
+  Movie object containing all movie data
+  
+  **Required properties:**
+  - `id` (number): Unique movie identifier
+  - `title` (string): Movie title
+  - `year` (number): Release year
+  - `duration` (number): Runtime in minutes
+  - `rating` (number): Rating score (0-10)
+  - `image` (string): URL to poster image
+  - `trailerUrl` (string): YouTube embed URL for trailer
+</ParamField>
+
+## Component Signature
+
+```javascript
+const PeliculaCard = ({ pelicula }) => { ... }
+```
+
+## Internal State
+
+<ResponseField name="showTrailer" type="boolean">
+  Controls visibility of the `TrailerModal` component
+</ResponseField>
+
+<ResponseField name="imageError" type="boolean">
+  Tracks whether the poster image failed to load (triggers fallback image)
+</ResponseField>
+
+## Features
+
+### Image Error Handling
+
+If the poster image fails to load, a fallback placeholder image is displayed:
+
+```javascript
+const handleImageError = () => {
+  setImageError(true);
+};
+
+// Fallback image URL
+'https://img.freepik.com/vector-premium/emoji-cara-nula-ilustracion_1272837-162.jpg'
+```
+
+### Trailer Modal Integration
+
+Clicking the "Ver Tráiler" button opens a `TrailerModal` component:
+
+```javascript
+<button 
+  className="pelicula-card__trailer-btn"
+  onClick={() => setShowTrailer(true)}
+>
+  ▶ Ver Tráiler
+</button>
+
+{showTrailer && (
+  <TrailerModal 
+    pelicula={pelicula} 
+    onClose={() => setShowTrailer(false)} 
+  />
+)}
+```
+
+### Navigation to Detail Page
+
+Uses React Router's `Link` component to navigate to the movie detail page:
+
+```javascript
+<Link to={`/pelicula/${pelicula.id}`} className="pelicula-card__details-btn">
+  Ver detalles
+</Link>
+```
+
+## Usage Example
+
+```javascript
+import React from 'react';
+import PeliculaCard from '../components/PeliculaCard';
+
+const ExampleComponent = () => {
+  const pelicula = {
+    id: 1,
+    title: "Inception",
+    year: 2010,
+    duration: 148,
+    rating: 8.8,
+    image: "https://example.com/inception.jpg",
+    trailerUrl: "https://www.youtube.com/embed/YoHD9XEInc0"
+  };
+
+  return <PeliculaCard pelicula={pelicula} />;
+};
+```
+
+## Rendered Structure
+
+```jsx
+<article className="pelicula-card">
+  <div className="pelicula-card__image-container">
+    <img className="pelicula-card__image" />
+    <div className="pelicula-card__overlay">
+      <button className="pelicula-card__trailer-btn">▶ Ver Tráiler</button>
+    </div>
+  </div>
+  
+  <div className="pelicula-card__content">
+    <h3 className="pelicula-card__title">{title}</h3>
+    <p className="pelicula-card__meta">{year} • {duration} min</p>
+    <p className="pelicula-card__rating">⭐ {rating}/10</p>
+    <div className="pelicula-card__actions">
+      <Link className="pelicula-card__details-btn">Ver detalles</Link>
+    </div>
+  </div>
+</article>
+```
+
+## Dependencies
+
+- `react` - useState hook
+- `react-router-dom` - Link component for navigation
+- `TrailerModal` - Modal component for displaying trailers
+
+## Source Location
+
+`src/components/PeliculaCard.jsx:5`

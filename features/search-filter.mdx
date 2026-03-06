@@ -1,0 +1,364 @@
+---
+title: 'Search & Filtering'
+description: 'Powerful search and category filtering to help users find the perfect movie'
+icon: 'filter'
+---
+
+## Overview
+
+ReactFlix provides intelligent search and filtering capabilities that allow users to quickly find movies by title, director, cast members, or genre. The system updates results in real-time with smooth loading states.
+
+## Search Functionality
+
+The search bar enables users to search across multiple movie attributes simultaneously.
+
+### What Users Can Search
+
+<CardGroup cols={3}>
+  <Card title="Movie Titles" icon="heading">
+    Find movies by their title (e.g., "Inception")
+  </Card>
+  <Card title="Directors" icon="person">
+    Search by director name (e.g., "Christopher Nolan")
+  </Card>
+  <Card title="Cast Members" icon="users">
+    Look up movies featuring specific actors
+  </Card>
+</CardGroup>
+
+### Search Implementation
+
+The `SearchBar` component is a simple, accessible input field:
+
+```jsx
+const SearchBar = ({ searchTerm, onSearchChange }) => {
+  return (
+    <div className="search-bar">
+      <input
+        type="text"
+        className="search-bar__input"
+        placeholder="Buscar películas por título, director o actor..."
+        value={searchTerm}
+        onChange={(e) => onSearchChange(e.target.value)}
+      />
+      <span className="search-bar__icon">🔍</span>
+    </div>
+  );
+};
+```
+
+<Info>
+  The search is case-insensitive and uses substring matching, making it forgiving of partial matches and typos.
+</Info>
+
+## Category Filtering
+
+Users can filter movies by genre using the category dropdown.
+
+### Available Categories
+
+The system automatically extracts unique genres from the movie data:
+
+- Ciencia Ficción
+- Acción
+- Crimen
+- Drama
+
+```jsx
+const CategoryFilter = ({ categories, selectedCategory, onCategoryChange }) => {
+  return (
+    <div className="category-filter">
+      <select
+        className="category-filter__select"
+        value={selectedCategory}
+        onChange={(e) => onCategoryChange(e.target.value)}
+      >
+        <option value="">Todas las categorías</option>
+        {categories.map(category => (
+          <option key={category} value={category}>
+            {category}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
+```
+
+<Note>
+  Categories are dynamically generated from the movie data, so adding new genres automatically updates the filter options.
+</Note>
+
+## The Search Hook
+
+All search and filter logic is centralized in the `usePeliculaSearch` custom hook, which manages state and performs efficient filtering.
+
+### Hook Structure
+
+```javascript
+const usePeliculaSearch = (initialPeliculas = mockPeliculas) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [filteredPeliculas, setFilteredPeliculas] = useState(initialPeliculas);
+  const [loading, setLoading] = useState(false);
+
+  // Extract unique categories
+  const categories = [...new Set(mockPeliculas.map((pelicula) => pelicula.genre))];
+
+  // Filter logic with debouncing
+  useEffect(() => {
+    setLoading(true);
+
+    const timer = setTimeout(() => {
+      let results = mockPeliculas;
+
+      // Apply search filter
+      if (searchTerm) {
+        results = results.filter(
+          (pelicula) =>
+            pelicula.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            pelicula.director.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            pelicula.cast.some((actor) =>
+              actor.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+        );
+      }
+
+      // Apply category filter
+      if (selectedCategory) {
+        results = results.filter((pelicula) => pelicula.genre === selectedCategory);
+      }
+
+      setFilteredPeliculas(results);
+      setLoading(false);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, selectedCategory]);
+
+  return {
+    searchTerm,
+    setSearchTerm,
+    selectedCategory,
+    setSelectedCategory,
+    filteredPeliculas,
+    loading,
+    categories,
+  };
+};
+```
+
+## Filtering Logic
+
+The hook applies filters in a specific order:
+
+### 1. Search Filter
+
+When a search term is entered, the system checks three attributes:
+
+```javascript
+if (searchTerm) {
+  results = results.filter(
+    (pelicula) =>
+      // Check title
+      pelicula.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      // Check director
+      pelicula.director.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      // Check cast members
+      pelicula.cast.some((actor) =>
+        actor.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+  );
+}
+```
+
+<Tip>
+  The search uses OR logic, so a movie matches if ANY of the attributes contain the search term.
+</Tip>
+
+### 2. Category Filter
+
+After applying search filters, category filtering narrows results further:
+
+```javascript
+if (selectedCategory) {
+  results = results.filter((pelicula) => pelicula.genre === selectedCategory);
+}
+```
+
+## Combined Filtering
+
+Users can combine search and category filters for precise results:
+
+**Example**: Search "Christopher" + Filter "Ciencia Ficción"
+- Shows only sci-fi movies directed by Christopher Nolan
+- Results: Inception, Interstellar
+
+**Example**: Search "DiCaprio" + Filter "All Categories"
+- Shows all movies featuring Leonardo DiCaprio
+- Results: Inception
+
+## Performance Optimizations
+
+### Debouncing
+
+The search uses a 300ms debounce to prevent excessive filtering:
+
+```javascript
+const timer = setTimeout(() => {
+  // Perform filtering
+}, 300);
+
+return () => clearTimeout(timer);
+```
+
+**Benefits**:
+- Reduces unnecessary computations while typing
+- Simulates network delay for realistic UX
+- Prevents flickering loading states
+
+<Info>
+  The 300ms delay is barely noticeable to users but significantly improves performance.
+</Info>
+
+### Loading States
+
+The hook manages loading states to provide visual feedback:
+
+```javascript
+setLoading(true);
+// ... perform filtering ...
+setLoading(false);
+```
+
+This triggers the `LoadingSpinner` component in the `PeliculaGrid`, giving users clear feedback that results are being updated.
+
+## Results Counter
+
+The catalog page displays the number of matching movies:
+
+```jsx
+<p className="peliculas-page__results">
+  {filteredPeliculas.length} películas encontradas
+</p>
+```
+
+This counter updates in real-time as users adjust their search and filters.
+
+## Edge Cases
+
+### No Results
+
+When no movies match the filters, users see a clear message:
+
+```jsx
+if (!peliculas || peliculas.length === 0) {
+  return (
+    <div className="pelicula-grid__empty">
+      <p>No se encontraron películas</p>
+    </div>
+  );
+}
+```
+
+### Empty Search
+
+Clearing the search box (empty string) shows all movies in the selected category.
+
+### All Categories
+
+Selecting "Todas las categorías" removes the category filter while maintaining any search filters.
+
+## User Experience Flow
+
+1. **Initial Load**: All movies displayed
+2. **Start Typing**: Loading spinner appears briefly
+3. **Results Update**: Grid animates to show matching movies
+4. **Counter Updates**: "X películas encontradas" reflects new count
+5. **Apply Category**: Results further refined by genre
+6. **Clear Filters**: Remove search text or select "All Categories" to reset
+
+## Search Examples
+
+<CardGroup cols={2}>
+  <Card title="By Title">
+    Type "Matrix" → Shows The Matrix
+  </Card>
+  <Card title="By Director">
+    Type "Nolan" → Shows Inception, Interstellar, The Dark Knight
+  </Card>
+  <Card title="By Actor">
+    Type "Keanu" → Shows The Matrix
+  </Card>
+  <Card title="Combined">
+    "Travolta" + "Crimen" → Shows Pulp Fiction
+  </Card>
+</CardGroup>
+
+## Technical Implementation
+
+### Component Integration
+
+The main page integrates all search components:
+
+```jsx
+const PeliculasPage = () => {
+  const {
+    searchTerm,
+    setSearchTerm,
+    selectedCategory,
+    setSelectedCategory,
+    filteredPeliculas,
+    loading,
+    categories
+  } = usePeliculaSearch();
+
+  return (
+    <div className="peliculas-page">
+      <h1>Catálogo de Películas</h1>
+      
+      <div className="peliculas-page__filters">
+        <SearchBar 
+          searchTerm={searchTerm} 
+          onSearchChange={setSearchTerm} 
+        />
+        <CategoryFilter 
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+        />
+      </div>
+
+      <p>{filteredPeliculas.length} películas encontradas</p>
+      <PeliculaGrid peliculas={filteredPeliculas} loading={loading} />
+    </div>
+  );
+};
+```
+
+## Accessibility
+
+- **Keyboard Navigation**: Users can tab between search and filter
+- **Screen Readers**: Clear labels and ARIA attributes
+- **Visual Feedback**: Loading states and result counts
+
+## Future Enhancements
+
+Potential improvements to the search system:
+
+- **Advanced Filters**: Rating range, year range, duration
+- **Sort Options**: By rating, year, title, price
+- **Search History**: Remember recent searches
+- **Autocomplete**: Suggest titles/actors as user types
+- **Fuzzy Search**: Handle misspellings better
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Movie Catalog" icon="film" href="/features/movie-catalog">
+    Return to the catalog overview
+  </Card>
+  <Card title="Movie Details" icon="circle-info" href="/features/movie-details">
+    Learn about the detailed movie page
+  </Card>
+</CardGroup>

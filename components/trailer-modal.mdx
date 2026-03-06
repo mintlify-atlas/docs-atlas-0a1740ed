@@ -1,0 +1,466 @@
+---
+title: TrailerModal
+description: Full-screen modal for displaying movie trailers
+icon: circle-play
+---
+
+# TrailerModal
+
+The `TrailerModal` component displays movie trailers in a full-screen modal overlay with an embedded YouTube video player. It includes keyboard support, click-outside-to-close, and automatic scroll locking.
+
+## Component Overview
+
+```jsx
+import TrailerModal from './components/TrailerModal';
+import { useState } from 'react';
+
+function App() {
+  const [showTrailer, setShowTrailer] = useState(false);
+  
+  const pelicula = {
+    title: "Inception",
+    trailerUrl: "https://www.youtube.com/embed/YoHD9XEInc0"
+  };
+
+  return (
+    <>
+      <button onClick={() => setShowTrailer(true)}>
+        Watch Trailer
+      </button>
+      
+      {showTrailer && (
+        <TrailerModal 
+          pelicula={pelicula}
+          onClose={() => setShowTrailer(false)}
+        />
+      )}
+    </>
+  );
+}
+```
+
+## Props
+
+<ParamField path="pelicula" type="object" required>
+  Movie object containing trailer information
+  
+  <ParamField path="pelicula.title" type="string" required>
+    Movie title displayed in the modal header
+  </ParamField>
+  
+  <ParamField path="pelicula.trailerUrl" type="string" required>
+    YouTube embed URL for the trailer (e.g., `https://www.youtube.com/embed/VIDEO_ID`)
+  </ParamField>
+</ParamField>
+
+<ParamField path="onClose" type="function" required>
+  Callback function invoked when the modal should close.
+  
+  **Signature**: `() => void`
+  
+  Triggered by:
+  - Clicking the close button (×)
+  - Clicking outside the modal content
+  - Pressing the `Escape` key
+</ParamField>
+
+## Features
+
+### Keyboard Support
+
+The modal listens for the `Escape` key and closes automatically:
+
+```jsx
+useEffect(() => {
+  const handleEsc = (e) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+  
+  document.addEventListener('keydown', handleEsc);
+  
+  return () => {
+    document.removeEventListener('keydown', handleEsc);
+  };
+}, [onClose]);
+```
+
+### Scroll Lock
+
+When the modal opens, page scrolling is disabled to prevent background content from scrolling:
+
+```jsx
+useEffect(() => {
+  document.body.style.overflow = 'hidden';
+  
+  return () => {
+    document.body.style.overflow = 'auto';
+  };
+}, []);
+```
+
+The scroll lock is automatically removed when the modal unmounts.
+
+### Click Outside to Close
+
+Clicking the backdrop closes the modal:
+
+```jsx
+<div className="modal" onClick={onClose}>
+  <div className="modal__content" onClick={(e) => e.stopPropagation()}>
+    {/* Modal content */}
+  </div>
+</div>
+```
+
+The `stopPropagation()` prevents clicks inside the modal content from triggering the close.
+
+### YouTube Embed
+
+The trailer is embedded using an iframe with appropriate attributes:
+
+```jsx
+<iframe
+  className="modal__video"
+  src={pelicula.trailerUrl}
+  title={`${pelicula.title} trailer`}
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+```
+
+This enables:
+- Autoplay support
+- Fullscreen mode
+- Picture-in-picture
+- Proper security permissions
+
+## Usage Examples
+
+### Basic Usage
+
+```jsx
+import { useState } from 'react';
+import TrailerModal from './components/TrailerModal';
+
+function MoviePreview() {
+  const [showTrailer, setShowTrailer] = useState(false);
+  
+  const movie = {
+    title: "The Matrix",
+    trailerUrl: "https://www.youtube.com/embed/vKQi3bBA1y8"
+  };
+
+  return (
+    <div>
+      <h2>{movie.title}</h2>
+      <button onClick={() => setShowTrailer(true)}>
+        ▶ Watch Trailer
+      </button>
+      
+      {showTrailer && (
+        <TrailerModal 
+          pelicula={movie}
+          onClose={() => setShowTrailer(false)}
+        />
+      )}
+    </div>
+  );
+}
+```
+
+### In PeliculaCard
+
+From `src/components/PeliculaCard.jsx:46`:
+
+```jsx
+import React, { useState } from 'react';
+import TrailerModal from './TrailerModal';
+
+const PeliculaCard = ({ pelicula }) => {
+  const [showTrailer, setShowTrailer] = useState(false);
+
+  return (
+    <>
+      <article className="pelicula-card">
+        <div className="pelicula-card__overlay">
+          <button 
+            className="pelicula-card__trailer-btn"
+            onClick={() => setShowTrailer(true)}
+          >
+            ▶ Ver Tráiler
+          </button>
+        </div>
+        {/* Rest of card content */}
+      </article>
+
+      {showTrailer && (
+        <TrailerModal 
+          pelicula={pelicula} 
+          onClose={() => setShowTrailer(false)} 
+        />
+      )}
+    </>
+  );
+};
+```
+
+### In Detail Page
+
+From `src/pages/PeliculaDetailPage.jsx:114`:
+
+```jsx
+import { useState } from 'react';
+import TrailerModal from '../components/TrailerModal';
+
+const PeliculaDetailPage = () => {
+  const [showTrailer, setShowTrailer] = useState(false);
+  const [pelicula, setPelicula] = useState(null);
+
+  return (
+    <div className="pelicula-detail">
+      <div className="pelicula-detail__actions">
+        <button 
+          className="pelicula-detail__trailer-btn"
+          onClick={() => setShowTrailer(true)}
+        >
+          Ver Tráiler
+        </button>
+      </div>
+
+      {showTrailer && (
+        <TrailerModal 
+          pelicula={pelicula} 
+          onClose={() => setShowTrailer(false)} 
+        />
+      )}
+    </div>
+  );
+};
+```
+
+## Full Component Code
+
+Location: `src/components/TrailerModal.jsx:1`
+
+```jsx
+import React, { useEffect } from 'react';
+
+const TrailerModal = ({ pelicula, onClose }) => {
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    
+    document.addEventListener('keydown', handleEsc);
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'auto';
+    };
+  }, [onClose]);
+
+  return (
+    <div className="modal" onClick={onClose}>
+      <div className="modal__content" onClick={(e) => e.stopPropagation()}>
+        <button className="modal__close" onClick={onClose}>×</button>
+        <h2 className="modal__title">{pelicula.title} - Tráiler</h2>
+        <div className="modal__video-container">
+          <iframe
+            className="modal__video"
+            src={pelicula.trailerUrl}
+            title={`${pelicula.title} trailer`}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TrailerModal;
+```
+
+## Styling
+
+The component uses these BEM classes:
+
+- `.modal` - Full-screen backdrop overlay
+- `.modal__content` - Centered modal container
+- `.modal__close` - Close button (×)
+- `.modal__title` - Modal title header
+- `.modal__video-container` - Responsive video wrapper
+- `.modal__video` - iframe element
+
+### Responsive Video
+
+The video maintains a 16:9 aspect ratio:
+
+```css
+.modal__video-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+}
+
+.modal__video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+```
+
+## YouTube URL Format
+
+Important: Use the **embed** URL format, not the regular watch URL:
+
+<Tabs>
+  <Tab title="Correct">
+    ```
+    https://www.youtube.com/embed/VIDEO_ID
+    ```
+    
+    Example: `https://www.youtube.com/embed/YoHD9XEInc0`
+  </Tab>
+  
+  <Tab title="Incorrect">
+    ```
+    https://www.youtube.com/watch?v=VIDEO_ID
+    ```
+    
+    This format won't work in an iframe!
+  </Tab>
+</Tabs>
+
+### Converting URLs
+
+If you have a watch URL, convert it:
+
+```javascript
+function convertToEmbedUrl(watchUrl) {
+  const videoId = watchUrl.split('v=')[1]?.split('&')[0];
+  return `https://www.youtube.com/embed/${videoId}`;
+}
+
+const watchUrl = "https://www.youtube.com/watch?v=YoHD9XEInc0";
+const embedUrl = convertToEmbedUrl(watchUrl);
+// Result: "https://www.youtube.com/embed/YoHD9XEInc0"
+```
+
+## Accessibility
+
+### Focus Management
+
+Consider trapping focus within the modal:
+
+```jsx
+import { useEffect, useRef } from 'react';
+
+function AccessibleTrailerModal({ pelicula, onClose }) {
+  const modalRef = useRef(null);
+  const previousFocus = useRef(null);
+
+  useEffect(() => {
+    // Save current focus
+    previousFocus.current = document.activeElement;
+    
+    // Focus modal
+    modalRef.current?.focus();
+    
+    return () => {
+      // Restore focus on unmount
+      previousFocus.current?.focus();
+    };
+  }, []);
+
+  return (
+    <div 
+      ref={modalRef}
+      className="modal" 
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      tabIndex={-1}
+    >
+      <div className="modal__content">
+        <h2 id="modal-title">{pelicula.title} - Tráiler</h2>
+        {/* Rest of content */}
+      </div>
+    </div>
+  );
+}
+```
+
+### ARIA Attributes
+
+```jsx
+<div 
+  className="modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title"
+>
+  <h2 id="modal-title">{pelicula.title} - Tráiler</h2>
+</div>
+```
+
+## Common Issues
+
+### Video Not Loading
+
+1. **Wrong URL format**: Use embed URL, not watch URL
+2. **HTTPS required**: Both your site and YouTube URL must use HTTPS
+3. **Embedding disabled**: Some videos don't allow embedding
+
+### Scroll Lock Not Working
+
+Ensure cleanup happens when component unmounts:
+
+```jsx
+useEffect(() => {
+  document.body.style.overflow = 'hidden';
+  
+  return () => {
+    document.body.style.overflow = 'auto'; // Critical!
+  };
+}, []);
+```
+
+### Event Listener Memory Leak
+
+Always clean up event listeners:
+
+```jsx
+useEffect(() => {
+  const handleEsc = (e) => {
+    if (e.key === 'Escape') onClose();
+  };
+  
+  document.addEventListener('keydown', handleEsc);
+  
+  return () => {
+    document.removeEventListener('keydown', handleEsc); // Must match!
+  };
+}, [onClose]);
+```
+
+## Related Components
+
+<CardGroup cols={2}>
+  <Card title="PeliculaCard" icon="id-card" href="/components/movie-card">
+    Movie card component that uses TrailerModal
+  </Card>
+  
+  <Card title="Movie Details" icon="circle-info" href="/features/movie-details">
+    Movie detail page that also uses TrailerModal
+  </Card>
+</CardGroup>

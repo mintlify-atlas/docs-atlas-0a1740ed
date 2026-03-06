@@ -1,0 +1,267 @@
+---
+title: PeliculaGrid
+description: Responsive grid layout for displaying movie cards
+icon: table-cells
+---
+
+# PeliculaGrid
+
+The `PeliculaGrid` component creates a responsive grid layout for displaying multiple movie cards. It handles loading states and empty results automatically.
+
+## Component Overview
+
+```jsx
+import PeliculaGrid from './components/PeliculaGrid';
+
+function PeliculasPage() {
+  const [peliculas, setPeliculas] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  return (
+    <PeliculaGrid 
+      peliculas={peliculas} 
+      loading={loading} 
+    />
+  );
+}
+```
+
+## Props
+
+<ParamField path="peliculas" type="array" required>
+  Array of movie objects to display in the grid
+  
+  Each movie object should contain:
+  - `id` (number) - Unique identifier
+  - `title` (string) - Movie title
+  - `year` (number) - Release year
+  - `duration` (number) - Duration in minutes
+  - `rating` (number) - Rating out of 10
+  - `image` (string) - Poster image URL
+  - `trailerUrl` (string) - YouTube embed URL
+</ParamField>
+
+<ParamField path="loading" type="boolean" required>
+  Loading state indicator. When `true`, displays a loading spinner instead of the grid.
+</ParamField>
+
+## States Handled
+
+The component automatically handles three different states:
+
+<Tabs>
+  <Tab title="Loading">
+    When `loading={true}`, displays the `LoadingSpinner` component:
+    
+    ```jsx
+    if (loading) {
+      return <LoadingSpinner />;
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Empty Results">
+    When no movies are found, displays an empty state message:
+    
+    ```jsx
+    if (!peliculas || peliculas.length === 0) {
+      return (
+        <div className="pelicula-grid__empty">
+          <p className="pelicula-grid__empty-text">No se encontraron películas</p>
+        </div>
+      );
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Movies Display">
+    When movies are available, renders them in a grid:
+    
+    ```jsx
+    return (
+      <div className="pelicula-grid">
+        {peliculas.map(pelicula => (
+          <PeliculaCard key={pelicula.id} pelicula={pelicula} />
+        ))}
+      </div>
+    );
+    ```
+  </Tab>
+</Tabs>
+
+## Usage Examples
+
+### Basic Usage
+
+```jsx
+import { useState, useEffect } from 'react';
+import PeliculaGrid from './components/PeliculaGrid';
+import { mockPeliculas } from './data/mockPeliculas';
+
+function HomePage() {
+  const [featuredPeliculas, setFeaturedPeliculas] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFeaturedPeliculas(mockPeliculas.slice(0, 4));
+      setLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div>
+      <h2>Películas Destacadas</h2>
+      <PeliculaGrid peliculas={featuredPeliculas} loading={loading} />
+    </div>
+  );
+}
+```
+
+From: `src/pages/PrincipalPage.jsx:30`
+
+### With Search and Filters
+
+```jsx
+import PeliculaGrid from './components/PeliculaGrid';
+import SearchBar from './components/SearchBar';
+import CategoryFilter from './components/CategoryFilter';
+import usePeliculaSearch from './hooks/usePeliculaSearch';
+
+function PeliculasPage() {
+  const {
+    searchTerm,
+    setSearchTerm,
+    selectedCategory,
+    setSelectedCategory,
+    filteredPeliculas,
+    loading,
+    categories
+  } = usePeliculaSearch();
+
+  return (
+    <div className="peliculas-page">
+      <h1>Catálogo de Películas</h1>
+      
+      <div className="peliculas-page__filters">
+        <SearchBar 
+          searchTerm={searchTerm} 
+          onSearchChange={setSearchTerm} 
+        />
+        <CategoryFilter 
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+        />
+      </div>
+
+      <p>{filteredPeliculas.length} películas encontradas</p>
+
+      <PeliculaGrid peliculas={filteredPeliculas} loading={loading} />
+    </div>
+  );
+}
+```
+
+From: `src/pages/PeliculasPage.jsx:18`
+
+## Full Component Code
+
+Location: `src/components/PeliculaGrid.jsx:1`
+
+```jsx
+import React from 'react';
+import PeliculaCard from './PeliculaCard';
+import LoadingSpinner from './LoadingSpinner';
+
+const PeliculaGrid = ({ peliculas, loading }) => {
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (!peliculas || peliculas.length === 0) {
+    return (
+      <div className="pelicula-grid__empty">
+        <p className="pelicula-grid__empty-text">No se encontraron películas</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pelicula-grid">
+      {peliculas.map(pelicula => (
+        <PeliculaCard key={pelicula.id} pelicula={pelicula} />
+      ))}
+    </div>
+  );
+};
+
+export default PeliculaGrid;
+```
+
+## Responsive Behavior
+
+The grid layout is controlled by CSS and automatically adapts to different screen sizes:
+
+```css
+.pelicula-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+}
+```
+
+This creates:
+- **Desktop**: 4-5 columns
+- **Tablet**: 2-3 columns  
+- **Mobile**: 1-2 columns
+
+## Performance Considerations
+
+### Key Props
+
+Always use unique `key` props when mapping over movies:
+
+```jsx
+{peliculas.map(pelicula => (
+  <PeliculaCard key={pelicula.id} pelicula={pelicula} />
+))}
+```
+
+This ensures React can efficiently update the DOM when the movie list changes.
+
+### Conditional Rendering
+
+The component short-circuits rendering when loading or empty, preventing unnecessary work:
+
+```jsx
+if (loading) return <LoadingSpinner />;
+if (!peliculas?.length) return <EmptyState />;
+return <Grid />;
+```
+
+## Styling
+
+The component uses these BEM classes:
+
+- `.pelicula-grid` - Main grid container
+- `.pelicula-grid__empty` - Empty state container
+- `.pelicula-grid__empty-text` - Empty state message
+
+## Related Components
+
+<CardGroup cols={3}>
+  <Card title="PeliculaCard" icon="id-card" href="/components/movie-card">
+    Individual movie card component rendered in the grid
+  </Card>
+  
+  <Card title="SearchBar" icon="magnifying-glass" href="/components/search-bar">
+    Often used above the grid for filtering movies
+  </Card>
+  
+  <Card title="CategoryFilter" icon="filter" href="/components/category-filter">
+    Category dropdown for filtering grid contents
+  </Card>
+</CardGroup>

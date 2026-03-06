@@ -1,0 +1,240 @@
+---
+title: 'mockPeliculas'
+description: 'Mock dataset containing 8 movie objects for development and testing'
+icon: 'database'
+---
+
+## Overview
+
+`mockPeliculas` is a static array of movie objects that serves as the data source for the ReactFlix application. It contains 8 movies with complete metadata including titles, directors, cast, ratings, pricing, and trailer URLs.
+
+## Import
+
+```javascript
+import { mockPeliculas } from '../data/mockPeliculas';
+```
+
+## Data Structure
+
+### Movie Object Schema
+
+Each movie object in the array contains the following properties:
+
+<ParamField path="id" type="number" required>
+  Unique identifier for the movie (sequential integers starting at 1)
+</ParamField>
+
+<ParamField path="title" type="string" required>
+  Movie title in original language
+</ParamField>
+
+<ParamField path="director" type="string" required>
+  Director name(s). Multiple directors are comma-separated (e.g., "Lana Wachowski, Lilly Wachowski")
+</ParamField>
+
+<ParamField path="year" type="number" required>
+  Release year (4-digit year)
+</ParamField>
+
+<ParamField path="genre" type="string" required>
+  Movie genre in Spanish
+  
+  **Available genres:**
+  - "Ciencia Ficción"
+  - "Acción"
+  - "Crimen"
+  - "Drama"
+</ParamField>
+
+<ParamField path="duration" type="number" required>
+  Movie runtime in minutes (136-175 range in dataset)
+</ParamField>
+
+<ParamField path="synopsis" type="string" required>
+  Brief plot summary in Spanish (1-2 sentences)
+</ParamField>
+
+<ParamField path="image" type="string" required>
+  URL to movie poster image (various sources including Bing, TMDB, Amazon)
+</ParamField>
+
+<ParamField path="trailerUrl" type="string" required>
+  YouTube embed URL for the movie trailer (format: `https://www.youtube.com/embed/{VIDEO_ID}`)
+</ParamField>
+
+<ParamField path="price" type="number" required>
+  Purchase price in Euros (range: 9.99€ - 14.99€)
+</ParamField>
+
+<ParamField path="alquilerPrecio" type="number" required>
+  Rental price in Peruvian Soles (range: S/ 2.99 - S/ 4.99)
+</ParamField>
+
+<ParamField path="rating" type="number" required>
+  User rating score on a 0-10 scale (range: 7.8 - 9.2 in dataset)
+</ParamField>
+
+<ParamField path="language" type="string" required>
+  Primary language of the movie. All movies in the dataset are "Inglés" (English)
+</ParamField>
+
+<ParamField path="cast" type="array<string>" required>
+  Array of main cast member names (typically 3 actors per movie)
+</ParamField>
+
+## Complete Dataset
+
+### Movies Included
+
+| ID | Title | Year | Genre | Director | Rating |
+|----|-------|------|-------|----------|--------|
+| 1 | Inception | 2010 | Ciencia Ficción | Christopher Nolan | 8.8 |
+| 2 | The Matrix | 1999 | Ciencia Ficción | Lana Wachowski, Lilly Wachowski | 8.7 |
+| 3 | Interstellar | 2014 | Ciencia Ficción | Christopher Nolan | 8.6 |
+| 4 | The Dark Knight | 2008 | Acción | Christopher Nolan | 9.0 |
+| 5 | Pulp Fiction | 1994 | Crimen | Quentin Tarantino | 8.9 |
+| 6 | The Godfather | 1972 | Drama | Francis Ford Coppola | 9.2 |
+| 7 | Avatar | 2009 | Ciencia Ficción | James Cameron | 7.8 |
+| 8 | Gladiator | 2000 | Acción | Ridley Scott | 8.5 |
+
+## Usage Examples
+
+<Tabs>
+  <Tab title="Direct Import">
+    ```javascript
+    import { mockPeliculas } from '../data/mockPeliculas';
+
+    console.log(mockPeliculas.length); // 8
+    console.log(mockPeliculas[0].title); // "Inception"
+    ```
+  </Tab>
+  <Tab title="In usePeliculaSearch">
+    ```javascript
+    import { mockPeliculas } from '../data/mockPeliculas';
+
+    const usePeliculaSearch = (initialPeliculas = mockPeliculas) => {
+      const [filteredPeliculas, setFilteredPeliculas] = useState(initialPeliculas);
+      
+      // Extract unique categories
+      const categories = [...new Set(mockPeliculas.map((pelicula) => pelicula.genre))];
+      // Result: ["Ciencia Ficción", "Acción", "Crimen", "Drama"]
+      
+      return { filteredPeliculas, categories };
+    };
+    ```
+  </Tab>
+  <Tab title="Finding Movie by ID">
+    ```javascript
+    import { mockPeliculas } from '../data/mockPeliculas';
+
+    const findMovieById = (id) => {
+      return mockPeliculas.find(m => m.id === parseInt(id));
+    };
+
+    const inception = findMovieById(1);
+    console.log(inception.title); // "Inception"
+    console.log(inception.director); // "Christopher Nolan"
+    ```
+  </Tab>
+  <Tab title="Filtering by Genre">
+    ```javascript
+    import { mockPeliculas } from '../data/mockPeliculas';
+
+    const sciFiMovies = mockPeliculas.filter(
+      pelicula => pelicula.genre === "Ciencia Ficción"
+    );
+    
+    console.log(sciFiMovies.length); // 4
+    // Inception, The Matrix, Interstellar, Avatar
+    ```
+  </Tab>
+</Tabs>
+
+## Sample Movie Object
+
+```javascript
+{
+  id: 1,
+  title: "Inception",
+  director: "Christopher Nolan",
+  year: 2010,
+  genre: "Ciencia Ficción",
+  duration: 148,
+  synopsis: "Un ladrón que roba secretos corporativos a través de la tecnología de sueños compartidos.",
+  image: "https://tse2.mm.bing.net/th/id/OIP.vnJImFIy1GEoBBAjyZ-tfQHaK-?rs=1&pid=ImgDetMain&o=7&rm=3",
+  trailerUrl: "https://www.youtube.com/embed/YoHD9XEInc0",
+  price: 12.99,
+  alquilerPrecio: 3.99,
+  rating: 8.8,
+  language: "Inglés",
+  cast: ["Leonardo DiCaprio", "Joseph Gordon-Levitt", "Elliot Page"]
+}
+```
+
+## Data Statistics
+
+### Genre Distribution
+
+- **Ciencia Ficción**: 4 movies (50%)
+- **Acción**: 2 movies (25%)
+- **Drama**: 1 movie (12.5%)
+- **Crimen**: 1 movie (12.5%)
+
+### Director Frequency
+
+- **Christopher Nolan**: 3 movies (Inception, Interstellar, The Dark Knight)
+- **Others**: 1 movie each
+
+### Price Ranges
+
+- **Purchase (price)**: 9.99€ - 14.99€
+- **Rental (alquilerPrecio)**: S/ 2.99 - S/ 4.99
+
+### Rating Distribution
+
+- **9.0+**: 2 movies
+- **8.5-8.9**: 4 movies
+- **7.5-8.4**: 2 movies
+
+### Year Range
+
+- **Oldest**: The Godfather (1972)
+- **Newest**: Interstellar (2014)
+- **Average**: ~2000
+
+## Currency Note
+
+<Warning>
+  The dataset uses two different currencies:
+  - **price** field: Euros (€) for purchases
+  - **alquilerPrecio** field: Peruvian Soles (S/) for rentals
+  
+  This inconsistency should be noted when implementing payment processing or displaying prices.
+</Warning>
+
+## TypeScript Type Definition
+
+```typescript
+interface Pelicula {
+  id: number;
+  title: string;
+  director: string;
+  year: number;
+  genre: string;
+  duration: number;
+  synopsis: string;
+  image: string;
+  trailerUrl: string;
+  price: number;
+  alquilerPrecio: number;
+  rating: number;
+  language: string;
+  cast: string[];
+}
+
+const mockPeliculas: Pelicula[] = [...];
+```
+
+## Source Location
+
+`src/data/mockPeliculas.js:1`

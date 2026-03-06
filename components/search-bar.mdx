@@ -1,0 +1,304 @@
+---
+title: SearchBar
+description: Text input component for searching movies
+icon: magnifying-glass
+---
+
+# SearchBar
+
+The `SearchBar` component provides a controlled text input for searching movies by title, director, or actor. It's a simple, reusable component that delegates state management to its parent.
+
+## Component Overview
+
+```jsx
+import SearchBar from './components/SearchBar';
+import { useState } from 'react';
+
+function App() {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  return (
+    <SearchBar 
+      searchTerm={searchTerm} 
+      onSearchChange={setSearchTerm} 
+    />
+  );
+}
+```
+
+## Props
+
+<ParamField path="searchTerm" type="string" required>
+  Current value of the search input. This is a controlled component, so the parent must manage this state.
+</ParamField>
+
+<ParamField path="onSearchChange" type="function" required>
+  Callback function invoked when the input value changes.
+  
+  **Signature**: `(newValue: string) => void`
+  
+  **Parameters**:
+  - `newValue` - The new search term entered by the user
+</ParamField>
+
+## Features
+
+### Controlled Component Pattern
+
+The SearchBar follows React's controlled component pattern:
+
+```jsx
+const SearchBar = ({ searchTerm, onSearchChange }) => {
+  return (
+    <input
+      type="text"
+      value={searchTerm}
+      onChange={(e) => onSearchChange(e.target.value)}
+    />
+  );
+};
+```
+
+The parent component owns the state, making it easy to:
+- Sync with other filters
+- Persist to URL parameters
+- Reset or clear programmatically
+
+### Search Icon
+
+Includes a visual search icon for better UX:
+
+```jsx
+<span className="search-bar__icon">🔍</span>
+```
+
+### Placeholder Text
+
+Descriptive placeholder guides users:
+
+```jsx
+placeholder="Buscar películas por título, director o actor..."
+```
+
+## Usage Examples
+
+### Basic Search
+
+```jsx
+import { useState } from 'react';
+import SearchBar from './components/SearchBar';
+
+function SearchExample() {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  return (
+    <div>
+      <SearchBar 
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+      />
+      <p>Searching for: {searchTerm}</p>
+    </div>
+  );
+}
+```
+
+### With Movie Filtering
+
+```jsx
+import { useState, useMemo } from 'react';
+import SearchBar from './components/SearchBar';
+import PeliculaGrid from './components/PeliculaGrid';
+
+function PeliculasPage({ peliculas }) {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredPeliculas = useMemo(() => {
+    if (!searchTerm) return peliculas;
+    
+    const lowerSearch = searchTerm.toLowerCase();
+    return peliculas.filter(p => 
+      p.title.toLowerCase().includes(lowerSearch) ||
+      p.director.toLowerCase().includes(lowerSearch) ||
+      p.cast.some(actor => actor.toLowerCase().includes(lowerSearch))
+    );
+  }, [peliculas, searchTerm]);
+
+  return (
+    <div>
+      <SearchBar 
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+      />
+      <PeliculaGrid peliculas={filteredPeliculas} loading={false} />
+    </div>
+  );
+}
+```
+
+### In Real Application
+
+From `src/pages/PeliculasPage.jsx:23`:
+
+```jsx
+import PeliculaGrid from '../components/PeliculaGrid';
+import SearchBar from '../components/SearchBar';
+import CategoryFilter from '../components/CategoryFilter';
+import usePeliculaSearch from '../hooks/usePeliculaSearch';
+
+const PeliculasPage = () => {
+  const {
+    searchTerm,
+    setSearchTerm,
+    selectedCategory,
+    setSelectedCategory,
+    filteredPeliculas,
+    loading,
+    categories
+  } = usePeliculaSearch();
+
+  return (
+    <div className="peliculas-page">
+      <h1 className="peliculas-page__title">Catálogo de Películas</h1>
+      
+      <div className="peliculas-page__filters">
+        <SearchBar 
+          searchTerm={searchTerm} 
+          onSearchChange={setSearchTerm} 
+        />
+        <CategoryFilter 
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+        />
+      </div>
+
+      <p className="peliculas-page__results">
+        {filteredPeliculas.length} películas encontradas
+      </p>
+
+      <PeliculaGrid peliculas={filteredPeliculas} loading={loading} />
+    </div>
+  );
+};
+```
+
+## Full Component Code
+
+Location: `src/components/SearchBar.jsx:1`
+
+```jsx
+import React from 'react';
+
+const SearchBar = ({ searchTerm, onSearchChange }) => {
+  return (
+    <div className="search-bar">
+      <input
+        type="text"
+        className="search-bar__input"
+        placeholder="Buscar películas por título, director o actor..."
+        value={searchTerm}
+        onChange={(e) => onSearchChange(e.target.value)}
+      />
+      <span className="search-bar__icon">🔍</span>
+    </div>
+  );
+};
+
+export default SearchBar;
+```
+
+## Accessibility
+
+### Keyboard Support
+
+The input supports standard keyboard interactions:
+- Type to search
+- `Tab` to navigate
+- `Escape` to clear (with custom handler)
+
+### Adding Labels
+
+For better accessibility, add an associated label:
+
+```jsx
+<label htmlFor="movie-search" className="sr-only">
+  Search movies
+</label>
+<SearchBar 
+  id="movie-search"
+  searchTerm={searchTerm}
+  onSearchChange={setSearchTerm}
+/>
+```
+
+## Styling
+
+The component uses these BEM classes:
+
+- `.search-bar` - Main container
+- `.search-bar__input` - Text input element
+- `.search-bar__icon` - Search icon
+
+## Custom Enhancements
+
+### Debounced Search
+
+To avoid excessive filtering on every keystroke:
+
+```jsx
+import { useState, useEffect } from 'react';
+import { useDebounce } from './hooks/useDebounce';
+
+function DebouncedSearch() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
+  useEffect(() => {
+    // Perform search with debouncedSearch
+  }, [debouncedSearch]);
+
+  return (
+    <SearchBar 
+      searchTerm={searchTerm}
+      onSearchChange={setSearchTerm}
+    />
+  );
+}
+```
+
+### Clear Button
+
+Add a button to clear the search:
+
+```jsx
+function SearchWithClear() {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  return (
+    <div className="search-container">
+      <SearchBar 
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+      />
+      {searchTerm && (
+        <button onClick={() => setSearchTerm('')}>
+          Clear
+        </button>
+      )}
+    </div>
+  );
+}
+```
+
+## Related Components
+
+<CardGroup cols={2}>
+  <Card title="CategoryFilter" icon="filter" href="/components/category-filter">
+    Often used alongside SearchBar for combined filtering
+  </Card>
+  
+  <Card title="PeliculaGrid" icon="table-cells" href="/components/movie-grid">
+    Displays filtered search results
+  </Card>
+</CardGroup>

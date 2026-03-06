@@ -1,0 +1,254 @@
+---
+title: Project Structure
+description: Understand the organization and architecture of the ReactFlix application
+---
+
+ReactFlix follows a clean, organized structure typical of modern React applications built with Create React App. This guide will help you navigate the codebase effectively.
+
+## Directory Overview
+
+The project is organized into the following main directories:
+
+```
+reactflix/
+├── public/              # Static assets and HTML template
+├── src/                 # Source code
+│   ├── components/      # Reusable React components
+│   ├── data/            # Mock data and data files
+│   ├── hooks/           # Custom React hooks
+│   ├── pages/           # Page-level components
+│   └── styles/          # CSS stylesheets
+├── package.json         # Dependencies and scripts
+└── README.md            # Project documentation
+```
+
+## Source Directory Structure
+
+The `src/` directory is the heart of the application, organized by feature and responsibility:
+
+<Accordion title="Components Directory">
+
+The `src/components/` folder contains reusable UI components:
+
+- **AlquilerButton.jsx** - Rental button with transaction handling
+- **CategoryFilter.jsx** - Genre/category filter dropdown
+- **CompraButton.jsx** - Purchase button with transaction handling
+- **Footer.jsx** - Application footer with site links
+- **Header.jsx** - Navigation header with routing
+- **LoadingSpinner.jsx** - Loading indicator component
+- **PeliculaCard.jsx** - Movie card display component
+- **PeliculaGrid.jsx** - Grid layout for movie cards
+- **SearchBar.jsx** - Search input with real-time filtering
+- **TrailerModal.jsx** - Modal for displaying movie trailers
+
+Each component is self-contained and follows React best practices.
+</Accordion>
+
+<Accordion title="Pages Directory">
+
+The `src/pages/` folder contains page-level components that correspond to routes:
+
+- **PrincipalPage.jsx** - Home page with featured content
+- **PeliculasPage.jsx** - Movie catalog with search and filters
+- **PeliculaDetailPage.jsx** - Detailed movie information page
+- **AlquileresPage.jsx** - User's rented movies management
+- **ComprasPage.jsx** - User's purchased movies library
+
+Pages compose multiple components and handle route-specific logic.
+</Accordion>
+
+<Accordion title="Data Directory">
+
+The `src/data/` folder contains data definitions:
+
+- **mockPeliculas.js** - Array of 8 movie objects with complete metadata
+
+Each movie object includes:
+```javascript
+{
+  id: 1,
+  title: "Inception",
+  director: "Christopher Nolan",
+  year: 2010,
+  genre: "Ciencia Ficción",
+  duration: 148,
+  synopsis: "...",
+  image: "https://...",
+  trailerUrl: "https://youtube.com/embed/...",
+  price: 12.99,
+  alquilerPrecio: 3.99,
+  rating: 8.8,
+  language: "Inglés",
+  cast: ["Leonardo DiCaprio", ...]
+}
+```
+</Accordion>
+
+<Accordion title="Hooks Directory">
+
+The `src/hooks/` folder contains custom React hooks:
+
+- **usePeliculaSearch.js** - Manages search, filtering, and movie state
+
+This hook provides:
+- Search term management
+- Category filtering
+- Filtered results
+- Loading states
+- Unique category extraction
+</Accordion>
+
+<Accordion title="Styles Directory">
+
+The `src/styles/` folder contains organized CSS files:
+
+- **App.css** - Global application styles and layout
+- **components.css** - Component-specific styles (411 lines)
+- **pages.css** - Page-specific styles (257 lines)
+
+Styles follow BEM methodology for consistent naming.
+</Accordion>
+
+## Key Files
+
+<Steps>
+  <Step title="App.js">
+    The main application component that sets up routing and layout structure.
+    
+    Located at: `src/App.js:1`
+    
+    ```javascript
+    import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+    import Header from './components/Header';
+    import Footer from './components/Footer';
+    
+    function App() {
+      return (
+        <Router>
+          <div className="app">
+            <Header />
+            <main className="app__main">
+              <Routes>
+                {/* Route definitions */}
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        </Router>
+      );
+    }
+    ```
+  </Step>
+  
+  <Step title="index.js">
+    Application entry point that renders the React app.
+    
+    Located at: `src/index.js:1`
+    
+    ```javascript
+    import ReactDOM from 'react-dom/client';
+    import App from './App';
+    
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+    ```
+  </Step>
+  
+  <Step title="package.json">
+    Dependencies and project configuration.
+    
+    Key dependencies:
+    - React 19.2.4
+    - React Router DOM 7.13.1
+    - React Scripts 5.0.1
+  </Step>
+</Steps>
+
+## Architecture Patterns
+
+### Component Organization
+
+<Note>
+ReactFlix follows a **component-based architecture** where UI is broken into small, reusable pieces. Components are organized by function rather than feature.
+</Note>
+
+**Component Hierarchy:**
+```
+App
+├── Header (persistent)
+├── Main Content (route-based)
+│   ├── PrincipalPage
+│   ├── PeliculasPage
+│   │   ├── SearchBar
+│   │   ├── CategoryFilter
+│   │   └── PeliculaGrid
+│   │       └── PeliculaCard
+│   ├── PeliculaDetailPage
+│   │   ├── AlquilerButton
+│   │   ├── CompraButton
+│   │   └── TrailerModal
+│   ├── AlquileresPage
+│   └── ComprasPage
+└── Footer (persistent)
+```
+
+### State Management
+
+ReactFlix uses a **hybrid state management approach**:
+
+- **Local State**: React's `useState` for component-specific state
+- **Custom Hooks**: `usePeliculaSearch` for shared search logic
+- **Browser Storage**: `localStorage` for persistent user data (rentals/purchases)
+
+<Tip>
+No external state management library (like Redux) is used, keeping the application simple and maintainable for its size.
+</Tip>
+
+### Data Flow
+
+1. **Mock Data** (`mockPeliculas.js`) serves as the data source
+2. **Custom Hook** (`usePeliculaSearch`) processes and filters data
+3. **Pages** consume hook data and pass to components
+4. **Components** render UI and handle user interactions
+5. **localStorage** persists user transactions
+
+## File Naming Conventions
+
+<Accordion title="Component Files">
+- **Format**: PascalCase with `.jsx` extension
+- **Examples**: `PeliculaCard.jsx`, `SearchBar.jsx`
+- **Reason**: Distinguishes React components from regular JavaScript files
+</Accordion>
+
+<Accordion title="Hook Files">
+- **Format**: camelCase with `use` prefix and `.js` extension
+- **Examples**: `usePeliculaSearch.js`
+- **Reason**: Follows React hook naming convention
+</Accordion>
+
+<Accordion title="Style Files">
+- **Format**: kebab-case or lowercase with `.css` extension
+- **Examples**: `components.css`, `pages.css`
+- **Reason**: Standard CSS file naming
+</Accordion>
+
+## Navigation
+
+<CardGroup cols={2}>
+  <Card title="Routing" icon="route" href="/guides/routing">
+    Learn about route configuration
+  </Card>
+  <Card title="Data Management" icon="database" href="/guides/data-management">
+    Understand data flow and storage
+  </Card>
+  <Card title="Styling" icon="paintbrush" href="/guides/styling">
+    Explore the styling approach
+  </Card>
+  <Card title="Customization" icon="wrench" href="/guides/customization">
+    Customize the application
+  </Card>
+</CardGroup>

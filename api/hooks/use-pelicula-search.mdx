@@ -1,0 +1,160 @@
+---
+title: 'usePeliculaSearch'
+description: 'Custom React hook for searching and filtering movies with real-time updates'
+icon: 'hook'
+---
+
+## Overview
+
+`usePeliculaSearch` is a custom React hook that provides search and category filtering functionality for the movie catalog. It manages search state, filtered results, loading states, and available categories.
+
+## Import
+
+```javascript
+import usePeliculaSearch from '../hooks/usePeliculaSearch';
+```
+
+## Signature
+
+```javascript
+const usePeliculaSearch = (initialPeliculas = mockPeliculas) => { ... }
+```
+
+<ParamField path="initialPeliculas" type="array" default="mockPeliculas">
+  Initial array of movie objects to filter. Defaults to the complete `mockPeliculas` dataset.
+</ParamField>
+
+## Return Value
+
+The hook returns an object with the following properties:
+
+<ResponseField name="searchTerm" type="string">
+  Current search query string
+</ResponseField>
+
+<ResponseField name="setSearchTerm" type="function">
+  State setter function to update the search term
+  
+  **Signature:** `(term: string) => void`
+</ResponseField>
+
+<ResponseField name="selectedCategory" type="string">
+  Currently selected genre/category filter (empty string means all categories)
+</ResponseField>
+
+<ResponseField name="setSelectedCategory" type="function">
+  State setter function to update the selected category
+  
+  **Signature:** `(category: string) => void`
+</ResponseField>
+
+<ResponseField name="filteredPeliculas" type="array">
+  Array of movie objects that match the current search and category filters
+</ResponseField>
+
+<ResponseField name="loading" type="boolean">
+  Loading state indicator (true while filtering is in progress)
+</ResponseField>
+
+<ResponseField name="categories" type="array<string>">
+  Array of unique genre strings extracted from all movies
+</ResponseField>
+
+## Behavior
+
+### Search Functionality
+
+The search filters movies by matching the `searchTerm` (case-insensitive) against:
+- Movie title (`pelicula.title`)
+- Director name (`pelicula.director`)
+- Cast members (`pelicula.cast` array)
+
+### Category Filtering
+
+When a category is selected, only movies with matching `genre` values are returned.
+
+### Debouncing
+
+Filtering operations are debounced with a 300ms delay to simulate network latency and prevent excessive re-renders.
+
+### Dependencies
+
+The filtering effect runs whenever `searchTerm` or `selectedCategory` changes.
+
+## Usage Example
+
+```javascript
+import React from 'react';
+import usePeliculaSearch from '../hooks/usePeliculaSearch';
+import PeliculaGrid from '../components/PeliculaGrid';
+import SearchBar from '../components/SearchBar';
+import CategoryFilter from '../components/CategoryFilter';
+
+const PeliculasPage = () => {
+  const {
+    searchTerm,
+    setSearchTerm,
+    selectedCategory,
+    setSelectedCategory,
+    filteredPeliculas,
+    loading,
+    categories
+  } = usePeliculaSearch();
+
+  return (
+    <div className="peliculas-page">
+      <h1>Catálogo de Películas</h1>
+      
+      <SearchBar 
+        searchTerm={searchTerm} 
+        onSearchChange={setSearchTerm} 
+      />
+      
+      <CategoryFilter 
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+      />
+
+      <p>{filteredPeliculas.length} películas encontradas</p>
+
+      <PeliculaGrid peliculas={filteredPeliculas} loading={loading} />
+    </div>
+  );
+};
+```
+
+## Implementation Details
+
+### State Management
+
+The hook maintains four internal state variables:
+- `searchTerm`: String input from search bar
+- `selectedCategory`: String for genre filter
+- `filteredPeliculas`: Computed array of matching movies
+- `loading`: Boolean for UI feedback
+
+### Filter Algorithm
+
+```javascript
+// Search term filtering
+if (searchTerm) {
+  results = results.filter(
+    (pelicula) =>
+      pelicula.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pelicula.director.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pelicula.cast.some((actor) =>
+        actor.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+  );
+}
+
+// Category filtering
+if (selectedCategory) {
+  results = results.filter((pelicula) => pelicula.genre === selectedCategory);
+}
+```
+
+## Source Location
+
+`src/hooks/usePeliculaSearch.js:4`

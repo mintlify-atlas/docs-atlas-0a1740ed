@@ -1,0 +1,345 @@
+---
+title: 'Movie Rentals'
+description: 'Rent movies for 48 hours and manage your active rentals'
+icon: 'clock'
+---
+
+## Overview
+
+ReactFlix allows users to rent movies for a 48-hour viewing period at a lower cost than purchasing. Rentals are tracked using browser localStorage, ensuring persistence across sessions.
+
+## How Rentals Work
+
+### Rental Process
+
+<CardGroup cols={3}>
+  <Card title="1. Browse" icon="film">
+    Find a movie in the catalog or detail page
+  </Card>
+  <Card title="2. Rent" icon="hand-pointer">
+    Click the "Alquilar" button with rental price
+  </Card>
+  <Card title="3. Enjoy" icon="play">
+    Access your rental for 48 hours
+  </Card>
+</CardGroup>
+
+## Rental Button Component
+
+The `AlquilerButton` (RentalButton) handles the rental transaction:
+
+```jsx
+const RentalButton = ({ pelicula, onRent }) => {
+  const [isRenting, setIsRenting] = useState(false);
+
+  const handleRent = () => {
+    setIsRenting(true);
+    
+    // Simulate rental processing
+    setTimeout(() => {
+      onRent(pelicula);
+      setIsRenting(false);
+      alert(`Has alquilado ${pelicula.title} por S/ ${pelicula.alquilerPrecio} por 48 horas`);
+    }, 500);
+  };
+
+  return (
+    <button 
+      className="alquiler-button"
+      onClick={handleRent}
+      disabled={isRenting}
+    >
+      {isRenting ? 'Procesando...' : `Alquilar por S/ ${pelicula.alquilerPrecio}`}
+    </button>
+  );
+};
+```
+
+### Button States
+
+- **Default**: Shows rental price (e.g., "Alquilar por S/ 3.99")
+- **Processing**: Displays "Procesando..." during rental
+- **Disabled**: Button is disabled while processing to prevent double-rentals
+
+<Info>
+  The rental uses Peruvian Sol (S/) currency. Rental prices range from S/ 2.99 to S/ 4.99 depending on the movie.
+</Info>
+
+## LocalStorage Persistence
+
+Rentals are stored in the browser's localStorage to persist across sessions:
+
+### Saving Rentals
+
+When a user rents a movie, it's added to localStorage with a timestamp:
+
+```javascript
+const handleRent = (rentedPelicula) => {
+  const newAlquileres = [
+    ...alquileres, 
+    { 
+      ...rentedPelicula, 
+      alquilerDate: new Date().toISOString() 
+    }
+  ];
+  setAlquileres(newAlquileres);
+  localStorage.setItem('alquileres', JSON.stringify(newAlquileres));
+};
+```
+
+### Loading Rentals
+
+The "Mis Alquileres" (My Rentals) page loads rentals from localStorage:
+
+```javascript
+useEffect(() => {
+  const savedAlquileres = JSON.parse(localStorage.getItem('alquileres') || '[]');
+  setAlquileres(savedAlquileres);
+  setLoading(false);
+}, []);
+```
+
+<Note>
+  The rental date is stored as an ISO 8601 string (e.g., "2026-03-06T12:30:45.123Z"), making it easy to calculate expiration times.
+</Note>
+
+## My Rentals Page
+
+The `AlquileresPage` displays all active rentals in a dedicated view:
+
+```jsx
+const MyAlquileresPage = () => {
+  const [alquileres, setAlquileres] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const savedAlquileres = JSON.parse(localStorage.getItem('alquileres') || '[]');
+    setAlquileres(savedAlquileres);
+    setLoading(false);
+  }, []);
+
+  return (
+    <div className="gestion-alquileres-page">
+      <h1 className="gestion-alquileres-page__title">Mis Alquileres</h1>
+      
+      {alquileres.length === 0 ? (
+        <div className="gestion-alquileres-page__empty">
+          <p>No tienes películas alquiladas</p>
+        </div>
+      ) : (
+        <>
+          <PeliculaGrid peliculas={alquileres} loading={loading} />
+          <div className="gestion-alquileres-page__actions">
+            {alquileres.map(alquiler => (
+              <button
+                key={alquiler.id}
+                className="gestion-alquileres-page__extend-btn"
+                onClick={() => handleExtendRental(alquiler.id)}
+              >
+                Extender alquiler de {alquiler.title}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+```
+
+## Rental Management Features
+
+### View Rentals
+
+Users can view all their rented movies in a grid layout, similar to the main catalog:
+
+- **Movie Posters**: Visual representation of rented movies
+- **Metadata**: Title, year, duration, and rating
+- **Quick Access**: Click to view full details or watch
+
+### Extend Rental Period
+
+Users can extend their rental period for an additional 48 hours:
+
+```javascript
+const handleExtendRental = (peliculaId) => {
+  const updatedAlquileres = alquileres.map(alquiler => {
+    if (alquiler.id === peliculaId) {
+      alert(`Plazo de alquiler extendido por 48 horas adicionales para ${alquiler.title}`);
+      return { ...alquiler, extended: true };
+    }
+    return alquiler;
+  });
+  setAlquileres(updatedAlquileres);
+  localStorage.setItem('alquileres', JSON.stringify(updatedAlquileres));
+};
+```
+
+<Tip>
+  The extend feature adds an "extended: true" flag to the rental object, which can be used to calculate the new expiration date.
+</Tip>
+
+## Empty State
+
+When users have no active rentals, a clear message is displayed:
+
+```jsx
+{alquileres.length === 0 ? (
+  <div className="gestion-alquileres-page__empty">
+    <p>No tienes películas alquiladas</p>
+  </div>
+) : (
+  // Show rental grid
+)}
+```
+
+## Rental Workflow
+
+### From Movie Detail Page
+
+1. **Navigate**: User views a movie's detail page
+2. **See Price**: Rental button shows "Alquilar por S/ 3.99"
+3. **Click Rent**: Button changes to "Procesando..."
+4. **Confirmation**: Alert displays rental confirmation
+5. **Access**: Movie appears in "Mis Alquileres" page
+
+### Accessing Rentals
+
+1. **Navigate**: User clicks "Mis Alquileres" in navigation
+2. **View Grid**: All rented movies displayed in grid
+3. **Extend**: Click extend button for additional 48 hours
+4. **Watch**: Click movie card to view details and watch
+
+## Data Structure
+
+Rental objects stored in localStorage include:
+
+```javascript
+{
+  // Original movie data
+  id: 1,
+  title: "Inception",
+  director: "Christopher Nolan",
+  year: 2010,
+  genre: "Ciencia Ficción",
+  duration: 148,
+  synopsis: "...",
+  image: "https://...",
+  price: 12.99,
+  alquilerPrecio: 3.99,
+  rating: 8.8,
+  // Rental-specific data
+  alquilerDate: "2026-03-06T12:30:45.123Z",
+  extended: false
+}
+```
+
+## User Experience
+
+### Visual Feedback
+
+- **Button States**: Clear indication of processing state
+- **Confirmation Alerts**: Immediate feedback on successful rental
+- **Loading States**: Spinner while fetching rental data
+- **Empty State**: Helpful message when no rentals exist
+
+### Navigation
+
+Users can access their rentals from multiple places:
+
+- **Navigation Menu**: "Mis Alquileres" link in header
+- **After Renting**: Confirmation message mentions 48-hour period
+- **Movie Cards**: Rented movies appear in dedicated page
+
+## Technical Implementation
+
+### Component Hierarchy
+
+```
+AlquileresPage (Page)
+├── PeliculaGrid (Display rentals)
+│   └── PeliculaCard (Individual rental)
+│       └── TrailerModal (Watch trailers)
+└── Extend Buttons (Rental management)
+```
+
+### Integration with Detail Page
+
+The movie detail page integrates rental functionality:
+
+```jsx
+const PeliculaDetailPage = () => {
+  const [alquileres, setAlquileres] = useState([]);
+
+  useEffect(() => {
+    const savedAlquileres = JSON.parse(localStorage.getItem('alquileres') || '[]');
+    setAlquileres(savedAlquileres);
+  }, []);
+
+  const handleRent = (rentedPelicula) => {
+    const newAlquileres = [
+      ...alquileres, 
+      { ...rentedPelicula, alquilerDate: new Date().toISOString() }
+    ];
+    setAlquileres(newAlquileres);
+    localStorage.setItem('alquileres', JSON.stringify(newAlquileres));
+  };
+
+  return (
+    <div className="pelicula-detail__actions">
+      <RentalButton pelicula={pelicula} onRent={handleRent} />
+    </div>
+  );
+};
+```
+
+## Pricing
+
+Rental prices vary by movie:
+
+| Movie | Rental Price | Purchase Price |
+|-------|--------------|----------------|
+| The Matrix | S/ 2.99 | S/ 9.99 |
+| Pulp Fiction | S/ 2.99 | S/ 10.99 |
+| Gladiator | S/ 2.99 | S/ 10.99 |
+| The Dark Knight | S/ 3.49 | S/ 11.99 |
+| Inception | S/ 3.99 | S/ 12.99 |
+| Avatar | S/ 3.99 | S/ 12.99 |
+| The Godfather | S/ 3.99 | S/ 13.99 |
+| Interstellar | S/ 4.99 | S/ 14.99 |
+
+<Info>
+  Rentals are typically 30-40% of the purchase price, making them attractive for one-time viewing.
+</Info>
+
+## Browser Compatibility
+
+The rental system uses localStorage, which is supported by all modern browsers:
+
+- **Storage Limit**: 5-10 MB per domain
+- **Persistence**: Data survives browser restarts
+- **Accessibility**: Available in all tabs/windows of same domain
+
+<Note>
+  If users clear browser data or use incognito mode, rentals will be lost. Consider implementing user accounts for production.
+</Note>
+
+## Future Enhancements
+
+- **Expiration Timer**: Show countdown for 48-hour rental period
+- **Auto-Removal**: Delete expired rentals automatically
+- **Rental History**: Track past rentals even after expiration
+- **Payment Integration**: Connect to real payment gateway
+- **Download Option**: Allow offline viewing during rental period
+- **Multiple Profiles**: Separate rental libraries per user
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Purchase Movies" icon="shopping-cart" href="/features/purchases">
+    Learn about buying movies for permanent access
+  </Card>
+  <Card title="Movie Details" icon="circle-info" href="/features/movie-details">
+    Explore the detailed movie page where rentals happen
+  </Card>
+</CardGroup>

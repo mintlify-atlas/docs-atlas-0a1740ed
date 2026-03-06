@@ -1,0 +1,353 @@
+---
+title: CategoryFilter
+description: Dropdown component for filtering movies by category
+icon: filter
+---
+
+# CategoryFilter
+
+The `CategoryFilter` component provides a dropdown select menu for filtering movies by genre/category. Like the SearchBar, it's a controlled component that delegates state management to its parent.
+
+## Component Overview
+
+```jsx
+import CategoryFilter from './components/CategoryFilter';
+import { useState } from 'react';
+
+function App() {
+  const categories = ['Action', 'Comedy', 'Drama', 'Sci-Fi'];
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  return (
+    <CategoryFilter 
+      categories={categories}
+      selectedCategory={selectedCategory}
+      onCategoryChange={setSelectedCategory}
+    />
+  );
+}
+```
+
+## Props
+
+<ParamField path="categories" type="array" required>
+  Array of category/genre strings to display as options in the dropdown.
+  
+  **Example**: `['Action', 'Comedy', 'Drama', 'Sci-Fi', 'Horror']`
+</ParamField>
+
+<ParamField path="selectedCategory" type="string" required>
+  Currently selected category value. Use empty string `''` for "all categories".
+</ParamField>
+
+<ParamField path="onCategoryChange" type="function" required>
+  Callback function invoked when the selection changes.
+  
+  **Signature**: `(newCategory: string) => void`
+  
+  **Parameters**:
+  - `newCategory` - The selected category string, or `''` if "all categories" is selected
+</ParamField>
+
+## Features
+
+### Default "All Categories" Option
+
+The component includes a default option for showing all movies:
+
+```jsx
+<select value={selectedCategory} onChange={(e) => onCategoryChange(e.target.value)}>
+  <option value="">Todas las categorías</option>
+  {categories.map(category => (
+    <option key={category} value={category}>
+      {category}
+    </option>
+  ))}
+</select>
+```
+
+When the user selects "Todas las categorías", the value becomes an empty string `''`.
+
+### Dynamic Category List
+
+Categories are dynamically mapped from the `categories` prop, making the component reusable across different datasets.
+
+## Usage Examples
+
+### Basic Category Filter
+
+```jsx
+import { useState } from 'react';
+import CategoryFilter from './components/CategoryFilter';
+
+function CategoryExample() {
+  const categories = ['Action', 'Comedy', 'Drama'];
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  return (
+    <div>
+      <CategoryFilter 
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+      />
+      <p>Selected: {selectedCategory || 'All'}</p>
+    </div>
+  );
+}
+```
+
+### With Movie Filtering
+
+```jsx
+import { useState, useMemo } from 'react';
+import CategoryFilter from './components/CategoryFilter';
+import PeliculaGrid from './components/PeliculaGrid';
+
+function FilteredMovies({ peliculas }) {
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  // Extract unique categories from movies
+  const categories = useMemo(() => {
+    return [...new Set(peliculas.map(p => p.genre))];
+  }, [peliculas]);
+
+  // Filter movies by selected category
+  const filteredPeliculas = useMemo(() => {
+    if (!selectedCategory) return peliculas;
+    return peliculas.filter(p => p.genre === selectedCategory);
+  }, [peliculas, selectedCategory]);
+
+  return (
+    <div>
+      <CategoryFilter 
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+      />
+      <PeliculaGrid peliculas={filteredPeliculas} loading={false} />
+    </div>
+  );
+}
+```
+
+### Combined with SearchBar
+
+From `src/pages/PeliculasPage.jsx:27`:
+
+```jsx
+import PeliculaGrid from '../components/PeliculaGrid';
+import SearchBar from '../components/SearchBar';
+import CategoryFilter from '../components/CategoryFilter';
+import usePeliculaSearch from '../hooks/usePeliculaSearch';
+
+const PeliculasPage = () => {
+  const {
+    searchTerm,
+    setSearchTerm,
+    selectedCategory,
+    setSelectedCategory,
+    filteredPeliculas,
+    loading,
+    categories
+  } = usePeliculaSearch();
+
+  return (
+    <div className="peliculas-page">
+      <h1 className="peliculas-page__title">Catálogo de Películas</h1>
+      
+      <div className="peliculas-page__filters">
+        <SearchBar 
+          searchTerm={searchTerm} 
+          onSearchChange={setSearchTerm} 
+        />
+        <CategoryFilter 
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+        />
+      </div>
+
+      <p className="peliculas-page__results">
+        {filteredPeliculas.length} películas encontradas
+      </p>
+
+      <PeliculaGrid peliculas={filteredPeliculas} loading={loading} />
+    </div>
+  );
+};
+```
+
+## Full Component Code
+
+Location: `src/components/CategoryFilter.jsx:1`
+
+```jsx
+import React from 'react';
+
+const CategoryFilter = ({ categories, selectedCategory, onCategoryChange }) => {
+  return (
+    <div className="category-filter">
+      <select
+        className="category-filter__select"
+        value={selectedCategory}
+        onChange={(e) => onCategoryChange(e.target.value)}
+      >
+        <option value="">Todas las categorías</option>
+        {categories.map(category => (
+          <option key={category} value={category}>
+            {category}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
+
+export default CategoryFilter;
+```
+
+## Extracting Categories from Data
+
+Typically, categories are extracted from your movie data:
+
+```jsx
+const categories = useMemo(() => {
+  // Get unique genres from all movies
+  return [...new Set(peliculas.map(p => p.genre))];
+}, [peliculas]);
+```
+
+This ensures your filter always reflects the available categories in your dataset.
+
+## Combined Filtering Logic
+
+When using both search and category filters:
+
+```jsx
+const filteredPeliculas = useMemo(() => {
+  let results = peliculas;
+
+  // Apply category filter
+  if (selectedCategory) {
+    results = results.filter(p => p.genre === selectedCategory);
+  }
+
+  // Apply search filter
+  if (searchTerm) {
+    const lowerSearch = searchTerm.toLowerCase();
+    results = results.filter(p => 
+      p.title.toLowerCase().includes(lowerSearch) ||
+      p.director.toLowerCase().includes(lowerSearch)
+    );
+  }
+
+  return results;
+}, [peliculas, selectedCategory, searchTerm]);
+```
+
+## Styling
+
+The component uses these BEM classes:
+
+- `.category-filter` - Main container
+- `.category-filter__select` - Select dropdown element
+
+## Accessibility
+
+### Keyboard Navigation
+
+The native `<select>` element provides full keyboard support:
+- `Tab` to focus
+- `Arrow keys` to navigate options
+- `Enter/Space` to select
+- `Escape` to close dropdown
+
+### Adding Labels
+
+For better accessibility, add a label:
+
+```jsx
+<label htmlFor="category-select" className="category-filter__label">
+  Filter by category:
+</label>
+<CategoryFilter 
+  id="category-select"
+  categories={categories}
+  selectedCategory={selectedCategory}
+  onCategoryChange={setSelectedCategory}
+/>
+```
+
+## Enhancements
+
+### Multi-Select Categories
+
+For selecting multiple categories, you could extend the component:
+
+```jsx
+function MultiCategoryFilter({ categories, selectedCategories, onChange }) {
+  const handleToggle = (category) => {
+    if (selectedCategories.includes(category)) {
+      onChange(selectedCategories.filter(c => c !== category));
+    } else {
+      onChange([...selectedCategories, category]);
+    }
+  };
+
+  return (
+    <div className="multi-category-filter">
+      {categories.map(category => (
+        <label key={category}>
+          <input 
+            type="checkbox"
+            checked={selectedCategories.includes(category)}
+            onChange={() => handleToggle(category)}
+          />
+          {category}
+        </label>
+      ))}
+    </div>
+  );
+}
+```
+
+### Category Counts
+
+Show how many movies are in each category:
+
+```jsx
+function CategoryFilterWithCounts({ peliculas, selectedCategory, onCategoryChange }) {
+  const categoryCounts = useMemo(() => {
+    return peliculas.reduce((acc, p) => {
+      acc[p.genre] = (acc[p.genre] || 0) + 1;
+      return acc;
+    }, {});
+  }, [peliculas]);
+
+  const categories = Object.keys(categoryCounts);
+
+  return (
+    <select value={selectedCategory} onChange={(e) => onCategoryChange(e.target.value)}>
+      <option value="">Todas las categorías ({peliculas.length})</option>
+      {categories.map(category => (
+        <option key={category} value={category}>
+          {category} ({categoryCounts[category]})
+        </option>
+      ))}
+    </select>
+  );
+}
+```
+
+## Related Components
+
+<CardGroup cols={2}>
+  <Card title="SearchBar" icon="magnifying-glass" href="/components/search-bar">
+    Text search component often used alongside CategoryFilter
+  </Card>
+  
+  <Card title="PeliculaGrid" icon="table-cells" href="/components/movie-grid">
+    Displays filtered results
+  </Card>
+</CardGroup>

@@ -1,0 +1,526 @@
+---
+title: Installation
+description: Complete installation guide for ReactFlix including prerequisites, setup, and configuration
+---
+
+## Prerequisites
+
+Before installing ReactFlix, ensure your development environment meets these requirements:
+
+### Required Software
+
+<AccordionGroup>
+  <Accordion title="Node.js (v14 or higher)">
+    ReactFlix requires Node.js for running the development server and building the application.
+    
+    **Check your version:**
+    ```bash
+    node --version
+    ```
+    
+    **Install Node.js:**
+    - Download from [nodejs.org](https://nodejs.org/)
+    - Use nvm (Node Version Manager): `nvm install 18`
+    - Recommended: Node.js v18 LTS or higher
+  </Accordion>
+
+  <Accordion title="npm (v6 or higher)">
+    npm is the package manager for JavaScript and comes bundled with Node.js.
+    
+    **Check your version:**
+    ```bash
+    npm --version
+    ```
+    
+    **Update npm:**
+    ```bash
+    npm install -g npm@latest
+    ```
+  </Accordion>
+
+  <Accordion title="Git (Optional but Recommended)">
+    Git is needed to clone the repository.
+    
+    **Check your version:**
+    ```bash
+    git --version
+    ```
+    
+    **Install Git:**
+    - Download from [git-scm.com](https://git-scm.com/)
+    - macOS: `brew install git`
+    - Ubuntu: `sudo apt-get install git`
+  </Accordion>
+</AccordionGroup>
+
+### System Requirements
+
+- **Operating System**: Windows 10+, macOS 10.14+, or Linux
+- **RAM**: Minimum 4GB (8GB recommended)
+- **Disk Space**: 500MB for node_modules and build files
+- **Browser**: Modern browser (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+)
+
+## Installation Methods
+
+<Tabs>
+  <Tab title="Git Clone (Recommended)">
+    ### Clone from Repository
+    
+    <Steps>
+      <Step title="Clone Repository">
+        ```bash
+        git clone <repository-url>
+        cd streaming
+        ```
+      </Step>
+
+      <Step title="Install Dependencies">
+        ```bash
+        npm install
+        ```
+        
+        This will install all dependencies listed in package.json:
+        
+        ```json package.json
+        {
+          "dependencies": {
+            "@testing-library/dom": "^10.4.1",
+            "@testing-library/jest-dom": "^6.9.1",
+            "@testing-library/react": "^16.3.2",
+            "@testing-library/user-event": "^13.5.0",
+            "react": "^19.2.4",
+            "react-dom": "^19.2.4",
+            "react-router-dom": "^7.13.1",
+            "react-scripts": "5.0.1",
+            "web-vitals": "^2.1.4"
+          }
+        }
+        ```
+      </Step>
+
+      <Step title="Verify Installation">
+        ```bash
+        npm start
+        ```
+        
+        Opens development server at [http://localhost:3000](http://localhost:3000)
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Download ZIP">
+    ### Download Source Code
+    
+    <Steps>
+      <Step title="Download">
+        Download the project ZIP file from the repository and extract it.
+      </Step>
+
+      <Step title="Navigate to Directory">
+        ```bash
+        cd path/to/streaming
+        ```
+      </Step>
+
+      <Step title="Install Dependencies">
+        ```bash
+        npm install
+        ```
+      </Step>
+
+      <Step title="Start Application">
+        ```bash
+        npm start
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Project Structure
+
+After installation, your project directory will look like this:
+
+```plaintext
+streaming/
+├── node_modules/           # Installed dependencies (auto-generated)
+├── public/                 # Static assets
+│   ├── favicon.ico
+│   ├── index.html         # HTML template
+│   ├── logo192.png
+│   ├── logo512.png
+│   ├── manifest.json      # PWA manifest
+│   └── robots.txt
+├── src/                   # Source code
+│   ├── components/        # Reusable UI components
+│   │   ├── AlquilerButton.jsx
+│   │   ├── CategoryFilter.jsx
+│   │   ├── CompraButton.jsx
+│   │   ├── Footer.jsx
+│   │   ├── Header.jsx
+│   │   ├── LoadingSpinner.jsx
+│   │   ├── PeliculaCard.jsx
+│   │   ├── PeliculaGrid.jsx
+│   │   ├── SearchBar.jsx
+│   │   └── TrailerModal.jsx
+│   ├── pages/             # Route-level components
+│   │   ├── AlquileresPage.jsx
+│   │   ├── ComprasPage.jsx
+│   │   ├── PeliculaDetailPage.jsx
+│   │   ├── PeliculasPage.jsx
+│   │   └── PrincipalPage.jsx
+│   ├── hooks/             # Custom React hooks
+│   │   └── usePeliculaSearch.js
+│   ├── data/              # Mock data and constants
+│   │   └── mockPeliculas.js
+│   ├── styles/            # CSS stylesheets
+│   │   ├── App.css
+│   │   ├── components.css
+│   │   └── pages.css
+│   ├── App.js             # Main application component
+│   ├── App.test.js        # App tests
+│   ├── index.js           # Application entry point
+│   ├── index.css          # Global styles
+│   ├── reportWebVitals.js # Performance monitoring
+│   └── setupTests.js      # Test configuration
+├── .gitignore
+├── package.json           # Dependencies and scripts
+├── package-lock.json      # Locked dependency versions
+├── LICENSE
+└── README.md
+```
+
+## Configuration
+
+### Package.json Scripts
+
+ReactFlix includes several npm scripts for different tasks:
+
+```json package.json
+{
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+<CodeGroup>
+
+```bash Development Mode
+npm start
+
+# Starts development server
+# Opens browser at http://localhost:3000
+# Hot reloading enabled
+# Shows lint errors in console
+```
+
+```bash Production Build
+npm run build
+
+# Creates optimized production build
+# Output directory: build/
+# Minified and optimized
+# Includes hashed filenames for caching
+```
+
+```bash Run Tests
+npm test
+
+# Launches Jest test runner
+# Interactive watch mode
+# Runs tests on file changes
+# Press 'a' to run all tests
+```
+
+```bash Eject (Advanced)
+npm run eject
+
+# ⚠️ One-way operation - cannot undo!
+# Exposes webpack config
+# Full control over build process
+# Only use if you need customization
+```
+
+</CodeGroup>
+
+### Environment Variables
+
+Create a `.env` file in the root directory for custom configuration:
+
+```bash .env
+# Server Port (default: 3000)
+PORT=3000
+
+# Browser auto-open (default: true)
+BROWSER=true
+
+# Enable HTTPS in development
+HTTPS=false
+
+# Advanced webpack config (if ejected)
+GENERATE_SOURCEMAP=true
+```
+
+<Note>
+  Environment variables must start with `REACT_APP_` to be accessible in your code (except built-in variables like PORT).
+</Note>
+
+### Browser Support
+
+ReactFlix is configured to support modern browsers:
+
+```json package.json
+{
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
+```
+
+## Dependency Overview
+
+### Core Dependencies
+
+<AccordionGroup>
+  <Accordion title="React 19.2.4">
+    The latest version of React with:
+    - Improved concurrent rendering
+    - Automatic batching
+    - Enhanced Suspense support
+    - New hooks and APIs
+  </Accordion>
+
+  <Accordion title="React Router DOM 7.13.1">
+    Client-side routing library providing:
+    - Route definitions with `<Routes>` and `<Route>`
+    - URL parameters (e.g., `/pelicula/:id`)
+    - Navigation with `<Link>` components
+    - Programmatic navigation with `useNavigate`
+  </Accordion>
+
+  <Accordion title="React Scripts 5.0.1">
+    Zero-configuration build tooling including:
+    - Webpack bundler
+    - Babel transpiler
+    - ESLint linter
+    - Jest test runner
+    - Development server
+  </Accordion>
+</AccordionGroup>
+
+### Testing Dependencies
+
+```bash
+@testing-library/react     # React component testing utilities
+@testing-library/jest-dom  # Custom Jest matchers
+@testing-library/dom       # DOM testing utilities
+@testing-library/user-event # User interaction simulation
+```
+
+### Development Dependencies
+
+All development dependencies are managed by `react-scripts` and include:
+
+- **Webpack** - Module bundler
+- **Babel** - JavaScript transpiler
+- **ESLint** - Code linting
+- **PostCSS** - CSS processing
+- **Jest** - Testing framework
+
+## Verify Installation
+
+<Steps>
+  <Step title="Check Installation">
+    Verify all dependencies are installed:
+    
+    ```bash
+    npm list --depth=0
+    ```
+    
+    You should see all packages from package.json listed.
+  </Step>
+
+  <Step title="Run Application">
+    Start the development server:
+    
+    ```bash
+    npm start
+    ```
+    
+    Browser should open automatically to http://localhost:3000
+  </Step>
+
+  <Step title="Check Features">
+    Verify these features work:
+    - Homepage loads with featured movies
+    - Navigation links work (Movies, Rentals, Purchases)
+    - Search functionality on /peliculas
+    - Movie detail pages load
+    - Trailers play in modal
+  </Step>
+
+  <Step title="Run Tests">
+    Ensure tests pass:
+    
+    ```bash
+    npm test -- --watchAll=false
+    ```
+    
+    All tests should pass without errors.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+### Common Installation Issues
+
+<AccordionGroup>
+  <Accordion title="npm install fails">
+    **Problem**: Errors during `npm install`
+    
+    **Solutions**:
+    ```bash
+    # Clear npm cache
+    npm cache clean --force
+    
+    # Delete node_modules and reinstall
+    rm -rf node_modules package-lock.json
+    npm install
+    
+    # Try using npm ci for clean install
+    npm ci
+    ```
+  </Accordion>
+
+  <Accordion title="Port 3000 already in use">
+    **Problem**: "Port 3000 is already in use"
+    
+    **Solutions**:
+    ```bash
+    # Find and kill process on port 3000
+    # macOS/Linux:
+    lsof -ti:3000 | xargs kill -9
+    
+    # Windows:
+    netstat -ano | findstr :3000
+    taskkill /PID <PID> /F
+    
+    # Or use different port
+    PORT=3001 npm start
+    ```
+  </Accordion>
+
+  <Accordion title="Module not found errors">
+    **Problem**: "Module not found: Can't resolve..."
+    
+    **Solutions**:
+    ```bash
+    # Ensure you're in the correct directory
+    pwd  # Should show path ending in /streaming
+    
+    # Reinstall dependencies
+    npm install
+    
+    # Check for typos in import statements
+    # Verify file paths are correct
+    ```
+  </Accordion>
+
+  <Accordion title="npm start shows blank page">
+    **Problem**: Browser shows blank white page
+    
+    **Solutions**:
+    1. Open browser DevTools (F12)
+    2. Check Console for errors
+    3. Verify all files are present in src/
+    4. Check that public/index.html exists
+    5. Clear browser cache and hard reload (Ctrl+Shift+R)
+    
+    ```bash
+    # Reset and restart
+    rm -rf node_modules build
+    npm install
+    npm start
+    ```
+  </Accordion>
+
+  <Accordion title="Node version incompatibility">
+    **Problem**: "The engine 'node' is incompatible"
+    
+    **Solutions**:
+    ```bash
+    # Check your Node version
+    node --version
+    
+    # Upgrade Node.js to v14+
+    # Using nvm:
+    nvm install 18
+    nvm use 18
+    
+    # Then reinstall dependencies
+    npm install
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+    Learn the basics and build your first feature
+  </Card>
+  <Card title="Project Structure" icon="folder-tree" href="/guides/project-structure">
+    Understand the codebase organization
+  </Card>
+  <Card title="Component Library" icon="puzzle-piece" href="/components/overview">
+    Explore all available components
+  </Card>
+  <Card title="Customization" icon="wrench" href="/guides/customization">
+    Customize ReactFlix for your needs
+  </Card>
+</CardGroup>
+
+## Additional Resources
+
+<Tip>
+  **Need help?** 
+  - Check the [React Documentation](https://react.dev)
+  - Review [Create React App docs](https://create-react-app.dev)
+  - Explore [React Router guides](https://reactrouter.com)
+</Tip>
+
+### Useful Commands Reference
+
+| Command | Description |
+|---------|-------------|
+| `npm install` | Install all dependencies |
+| `npm start` | Start development server |
+| `npm test` | Run test suite |
+| `npm run build` | Create production build |
+| `npm list` | List installed packages |
+| `npm outdated` | Check for outdated packages |
+| `npm update` | Update packages |
+| `npm audit` | Check for security vulnerabilities |
+| `npm audit fix` | Fix security vulnerabilities |
+
+### Performance Tips
+
+<Note>
+  For faster installation:
+  - Use `npm ci` instead of `npm install` in CI/CD environments
+  - Consider using [Yarn](https://yarnpkg.com) or [pnpm](https://pnpm.io) for faster installs
+  - Enable caching in your CI/CD pipeline
+</Note>
