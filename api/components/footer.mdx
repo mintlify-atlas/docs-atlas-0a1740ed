@@ -1,0 +1,263 @@
+---
+title: 'Footer'
+description: 'Application footer with branding, quick links, and contact information'
+icon: 'rectangle-vertical'
+---
+
+## Overview
+
+`Footer` is the application footer component that appears at the bottom of every page. It displays ReactFlix branding, quick links, contact information, and copyright notice. The footer provides a consistent bottom section across all pages.
+
+## Import
+
+```javascript
+import Footer from './components/Footer';
+```
+
+## Props
+
+This component takes no props.
+
+## Structure
+
+The footer is divided into four main sections:
+
+### 1. Branding Section
+
+Displays the ReactFlix brand name and tagline:
+
+```javascript src/components/Footer.jsx
+<div className="footer__section">
+  <h3 className="footer__title">ReactFlix</h3>
+  <p className="footer__text">Tu plataforma de streaming favorita</p>
+</div>
+```
+
+### 2. Quick Links
+
+Provides navigation to important pages:
+
+```javascript src/components/Footer.jsx
+<div className="footer__section">
+  <h4 className="footer__subtitle">Enlaces rápidos</h4>
+  <ul className="footer__list">
+    <li className="footer__item">Términos y condiciones</li>
+    <li className="footer__item">Política de privacidad</li>
+    <li className="footer__item">Ayuda</li>
+  </ul>
+</div>
+```
+
+<Note>
+  Currently, these are static text items. To make them functional links, wrap each item in a React Router `<Link>` component or `<a>` tag.
+</Note>
+
+### 3. Contact Information
+
+Displays contact details:
+
+```javascript src/components/Footer.jsx
+<div className="footer__section">
+  <h4 className="footer__subtitle">Contacto</h4>
+  <ul className="footer__list">
+    <li className="footer__item">Email: info@reactflix.com</li>
+    <li className="footer__item">Tel: +51 123 456 789</li>
+  </ul>
+</div>
+```
+
+### 4. Copyright Notice
+
+Shows copyright information:
+
+```javascript src/components/Footer.jsx
+<div className="footer__section">
+  <p className="footer__copyright">
+    &copy; 2026 ReactFlix. Todos los derechos reservados.
+  </p>
+</div>
+```
+
+## Complete Source Code
+
+```javascript src/components/Footer.jsx
+import React from 'react';
+
+const Footer = () => {
+  return (
+    <footer className="footer">
+      <div className="footer__container">
+        <div className="footer__section">
+          <h3 className="footer__title">ReactFlix</h3>
+          <p className="footer__text">Tu plataforma de streaming favorita</p>
+        </div>
+        
+        <div className="footer__section">
+          <h4 className="footer__subtitle">Enlaces rápidos</h4>
+          <ul className="footer__list">
+            <li className="footer__item">Términos y condiciones</li>
+            <li className="footer__item">Política de privacidad</li>
+            <li className="footer__item">Ayuda</li>
+          </ul>
+        </div>
+        
+        <div className="footer__section">
+          <h4 className="footer__subtitle">Contacto</h4>
+          <ul className="footer__list">
+            <li className="footer__item">Email: info@reactflix.com</li>
+            <li className="footer__item">Tel: +51 123 456 789</li>
+          </ul>
+        </div>
+        
+        <div className="footer__section">
+          <p className="footer__copyright">
+            &copy; 2026 ReactFlix. Todos los derechos reservados.
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
+```
+
+## Usage
+
+The Footer component is rendered at the app level in `App.js` so it appears on all pages:
+
+```javascript src/App.js
+import Footer from './components/Footer';
+
+function App() {
+  return (
+    <Router>
+      <div className="app">
+        <Header />
+        <main className="app__main">
+          <Routes>
+            {/* ... routes ... */}
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
+  );
+}
+```
+
+## Styling
+
+The Footer component uses BEM class naming:
+
+- `footer` - Main footer container
+- `footer__container` - Inner content wrapper (grid layout)
+- `footer__section` - Individual content section
+- `footer__title` - Main brand title (ReactFlix)
+- `footer__text` - Brand tagline text
+- `footer__subtitle` - Section headings
+- `footer__list` - Unordered list container
+- `footer__item` - Individual list item
+- `footer__copyright` - Copyright text
+
+Styles are defined in `src/styles/components.css:74`.
+
+## Layout
+
+The footer uses CSS Grid to create a responsive 4-column layout on desktop that collapses to a single column on mobile devices.
+
+```css
+.footer__container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .footer__container {
+    grid-template-columns: 1fr;
+  }
+}
+```
+
+## Customization
+
+### Making Links Functional
+
+Convert static text items to functional links:
+
+```javascript
+import { Link } from 'react-router-dom';
+
+<li className="footer__item">
+  <Link to="/terms">Términos y condiciones</Link>
+</li>
+<li className="footer__item">
+  <Link to="/privacy">Política de privacidad</Link>
+</li>
+<li className="footer__item">
+  <Link to="/help">Ayuda</Link>
+</li>
+```
+
+### Adding Social Media Icons
+
+Extend the footer with social media links:
+
+```javascript
+<div className="footer__section">
+  <h4 className="footer__subtitle">Síguenos</h4>
+  <div className="footer__socials">
+    <a href="https://facebook.com" aria-label="Facebook">
+      <FacebookIcon />
+    </a>
+    <a href="https://twitter.com" aria-label="Twitter">
+      <TwitterIcon />
+    </a>
+    <a href="https://instagram.com" aria-label="Instagram">
+      <InstagramIcon />
+    </a>
+  </div>
+</div>
+```
+
+### Dynamic Copyright Year
+
+Update the copyright to show the current year:
+
+```javascript
+<p className="footer__copyright">
+  &copy; {new Date().getFullYear()} ReactFlix. Todos los derechos reservados.
+</p>
+```
+
+### Newsletter Signup
+
+Add a newsletter subscription form:
+
+```javascript
+<div className="footer__section">
+  <h4 className="footer__subtitle">Newsletter</h4>
+  <form onSubmit={handleNewsletterSignup}>
+    <input 
+      type="email" 
+      placeholder="Tu email" 
+      className="footer__input"
+    />
+    <button type="submit" className="footer__button">
+      Suscribirse
+    </button>
+  </form>
+</div>
+```
+
+## Related Components
+
+<CardGroup cols={2}>
+  <Card title="Header" icon="bars" href="/api/components/header">
+    Application header component
+  </Card>
+  <Card title="Styling Guide" icon="paintbrush" href="/guides/styling">
+    Learn about the styling system
+  </Card>
+</CardGroup>

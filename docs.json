@@ -83,7 +83,9 @@
               "api/components/trailer-modal",
               "api/components/alquiler-button",
               "api/components/compra-button",
-              "api/components/loading-spinner"
+              "api/components/loading-spinner",
+              "api/components/header",
+              "api/components/footer"
             ]
           },
           {

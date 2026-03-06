@@ -1,0 +1,194 @@
+---
+title: 'Header'
+description: 'Application navigation header with logo, menu links, and user section'
+icon: 'bars'
+---
+
+## Overview
+
+`Header` is the main navigation component that appears at the top of every page. It provides branding (ReactFlix logo), main navigation links, and a user account section. The header uses React Router's `useLocation` hook to highlight the active page.
+
+## Import
+
+```javascript
+import Header from './components/Header';
+```
+
+## Props
+
+This component takes no props.
+
+## Features
+
+### Logo and Branding
+
+The header displays the ReactFlix logo with a clickable link to the home page:
+
+```javascript src/components/Header.jsx
+<Link to="/" className="header__logo">
+  <h1>
+    React<span>Flix</span>
+  </h1>
+</Link>
+```
+
+The logo uses a two-tone design where "React" is in one color and "Flix" is styled with a `<span>` for custom styling.
+
+### Navigation Menu
+
+The header includes four main navigation links:
+
+```javascript src/components/Header.jsx
+<nav className="header__nav">
+  <ul className="header__nav-list">
+    <li className="header__nav-item">
+      <Link to="/" className={`header__nav-link ${location.pathname === "/" ? "header__nav-link--active" : ""}`}>
+        Inicio
+      </Link>
+    </li>
+    <li className="header__nav-item">
+      <Link to="/peliculas" className={`header__nav-link ${location.pathname === "/peliculas" ? "header__nav-link--active" : ""}`}>
+        Películas
+      </Link>
+    </li>
+    <li className="header__nav-item">
+      <Link to="/gestion-alquileres" className={`header__nav-link ${location.pathname === "/gestion-alquileres" ? "header__nav-link--active" : ""}`}>
+        Mis Alquileres
+      </Link>
+    </li>
+    <li className="header__nav-item">
+      <Link to="/gestion-compras" className={`header__nav-link ${location.pathname === "/gestion-compras" ? "header__nav-link--active" : ""}`}>
+        Mis Compras
+      </Link>
+    </li>
+  </ul>
+</nav>
+```
+
+### Active Link Highlighting
+
+The component uses `useLocation()` from React Router to detect the current page and applies the `header__nav-link--active` class to the matching navigation link:
+
+```javascript src/components/Header.jsx
+const Header = () => {
+  const location = useLocation();
+  // ...
+};
+```
+
+This provides visual feedback showing users which page they're currently on.
+
+### User Section
+
+The header includes a user account section with an icon and username:
+
+```javascript src/components/Header.jsx
+<div className="header__user">
+  <span className="header__user-icon">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      fill="#e50914"
+    >
+      <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+    </svg>
+  </span>
+  <span className="header__user-name">Usuario</span>
+</div>
+```
+
+The user icon uses an inline SVG with the ReactFlix brand color (#e50914).
+
+## Usage
+
+The Header component is rendered at the app level in `App.js` so it appears on all pages:
+
+```javascript src/App.js
+import Header from './components/Header';
+
+function App() {
+  return (
+    <Router>
+      <div className="app">
+        <Header />
+        <main className="app__main">
+          <Routes>
+            {/* ... routes ... */}
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
+  );
+}
+```
+
+## Styling
+
+The Header component uses BEM class naming:
+
+- `header` - Main container
+- `header__container` - Inner content wrapper
+- `header__logo` - Logo link
+- `header__nav` - Navigation container
+- `header__nav-list` - Unordered list of nav items
+- `header__nav-item` - Individual nav item
+- `header__nav-link` - Nav link element
+- `header__nav-link--active` - Active state modifier
+- `header__user` - User section container
+- `header__user-icon` - User icon wrapper
+- `header__user-name` - Username text
+
+Styles are defined in `src/styles/components.css`.
+
+## Customization
+
+### Changing Navigation Links
+
+To add or modify navigation links, edit the navigation list in `src/components/Header.jsx:17`:
+
+```javascript
+<li className="header__nav-item">
+  <Link 
+    to="/new-page" 
+    className={`header__nav-link ${location.pathname === "/new-page" ? "header__nav-link--active" : ""}`}
+  >
+    New Page
+  </Link>
+</li>
+```
+
+### Updating the Logo
+
+Modify the logo text or structure in the header logo section (`src/components/Header.jsx:10`).
+
+### Adding User Authentication
+
+Replace the static user section with a dynamic component that shows the logged-in user's name or a login button:
+
+```javascript
+<div className="header__user">
+  {user ? (
+    <span className="header__user-name">{user.name}</span>
+  ) : (
+    <button onClick={handleLogin}>Login</button>
+  )}
+</div>
+```
+
+## Source Code
+
+View the complete source code at `src/components/Header.jsx:1`.
+
+## Related Components
+
+<CardGroup cols={2}>
+  <Card title="Footer" icon="bars" href="/api/components/footer">
+    Application footer component
+  </Card>
+  <Card title="Routing Guide" icon="route" href="/guides/routing">
+    Learn about navigation and routing
+  </Card>
+</CardGroup>
